@@ -21,48 +21,48 @@ int main (int argc, char *argv[])
 
 	img->set_fileent();
 	while ( (ifile= img->get_fileent()) != NULL ) {
-		class ImgSubfile *sub= ifile->subfile_find("TRE");
+		class ImgTRE *tre;
+		class ImgLBL *lbl;
+		class ImgRGN *rgn;
+		class ImgNET *net;
+		class ImgNOD *nod;
 
-		if ( sub != NULL ) {
-			class ImgTRE *tre= (ImgTRE *) sub;
-			class ImgLBL *lbl;
-			class ImgRGN *rgn;
-			class ImgNET *net;
-			class ImgNOD *nod;
-
+		tre = (ImgTRE *) ifile->subfile_find("TRE");
+		if(tre != NULL)
 			decode_tre_header(&dec, tre);
+		else
+			fprintf(stderr, "TRE not found\n");
 
-			lbl= (ImgLBL *) ifile->subfile_find("LBL");
-			if ( lbl == NULL ) {
-				fprintf(stderr, "LBL not found\n");
-				return 1;
-			}
+		lbl= (ImgLBL *) ifile->subfile_find("LBL");
+		if(lbl != NULL)
 			decode_lbl_header(&dec, lbl);
-
-			decode_tre_body();
-			decode_lbl_body();
-
-			net= (ImgNET *) ifile->subfile_find("NET");
-			if ( net ) decode_net_header(&dec, net);
-
-			nod= (ImgNOD *) ifile->subfile_find("NOD");
-			if ( nod ) decode_nod_header(&dec, nod);
-
-			rgn= (ImgRGN *) ifile->subfile_find("RGN");
-			if ( rgn == NULL ) {
-				fprintf(stderr, "RGN not found\n");
-				return 1;
-			}
-
-			decode_rgn_header(&dec, rgn);
-			decode_rgn_body();
-
-			if ( net ) decode_net_body();
-			if ( nod ) decode_nod_body();
-		} else {
-			fprintf(stderr, "TRE not found in\n");
-			return -1;
+		else {
+			fprintf(stderr, "LBL not found\n");
+			continue;
 		}
+
+		if(tre != NULL)
+			decode_tre_body();
+
+		decode_lbl_body();
+
+		net= (ImgNET *) ifile->subfile_find("NET");
+		if ( net ) decode_net_header(&dec, net);
+
+		nod= (ImgNOD *) ifile->subfile_find("NOD");
+		if ( nod ) decode_nod_header(&dec, nod);
+
+		rgn= (ImgRGN *) ifile->subfile_find("RGN");
+		if ( rgn == NULL ) {
+			fprintf(stderr, "RGN not found\n");
+			continue;	
+		}
+
+		decode_rgn_header(&dec, rgn);
+		decode_rgn_body();
+
+		if ( net ) decode_net_body();
+		if ( nod ) decode_nod_body();
 	}
 }
 
