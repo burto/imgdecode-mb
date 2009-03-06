@@ -82,7 +82,9 @@ int decode_header (class Decoder *dec)
 
 	dec->rawprint("*\n");
 
-	img->seek(2 * img->block_size());
+	int off = (img->block_size() > 512)? 0x1000 : 0x0400;
+
+	img->seek(off);
 
 	dec->print("???", img->get_byte());
 	dec->print("???", img->get_string(11).c_str());
@@ -94,13 +96,13 @@ int decode_header (class Decoder *dec)
 	dec->print("Sequence block start", img->get_uword());
 	dec->rawprint("*\n");
 	dec->print("Sequence block end (block %u)",
-		   img->last_seq_block(2 * img->block_size() + 512));
-	if ( img->tell() != (2 * img->block_size() + 512)) {
+		   img->last_seq_block(off + 512));
+	if ( img->tell() != (off + 512)) {
 		dec->print("Sequence block padding", img->get_uword());
 		dec->rawprint("*\n");
 	}
 
-	img->seek(2 * img->block_size() + 512);
+	img->seek(off + 512);
 
 	dec->banner("Begin FAT");
 	while ( img->tell() < subfile_offset ) {
