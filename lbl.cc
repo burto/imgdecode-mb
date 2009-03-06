@@ -33,6 +33,9 @@ string ImgLBL::label_parse_abs (off_t offset)
 	case LBL_ENC_6BIT:
 		return label_parse_6bit (offset);
 		break;
+	case LBL_ENC_8BIT:
+		return label_parse_8bit (offset);
+		break;
 	}
 }
 
@@ -130,6 +133,38 @@ string ImgLBL::char_6bit (byte_t byte, int *chset)
 
 	return s;
 }
+
+//-------------------------------------------------------------------
+// 8-bit decoding methods
+//-------------------------------------------------------------------
+
+string ImgLBL::label_parse_8bit (off_t offset)
+{
+	bool lcont= false;
+	int chset= SET_6_NORMAL;
+	unsigned char enc[3], data[4];
+	string label;
+
+	if ( offset > label_info.offset+label_info.length || 
+		offset < label_info.offset ) {
+
+		return "(invalid offset)";
+	}
+
+	if ( img->tell() != offset ) img->seek(offset);
+
+	for (;;) {
+		img->get_cstring(enc, 1);
+
+		img->sbuffer_set();
+
+		if(enc[0] == 0)
+		  return label;
+
+		label += (char)enc[0];
+	}
+}
+
 
 //-------------------------------------------------------------------
 // Locality methods

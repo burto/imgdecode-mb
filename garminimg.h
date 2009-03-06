@@ -326,6 +326,8 @@ class ImgLBL : public ImgSubfile {
 	string char_6bit (byte_t byte, int *chset);
 	string label_parse_6bit (off_t offset);
 
+	string label_parse_8bit (off_t offset);
+
 public:
 	struct sec_info_struct country_info, region_info, city_info,
 		poiprop_info, zip_info, unkn1_info, label_info,
