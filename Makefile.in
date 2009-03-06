@@ -1,0 +1,24 @@
+
+CXX=@CXX@
+CFLAGS=-g
+OBJS=main.o garminimg.o imgfile.o subfile.o tre.o lbl.o rgn.o net.o nod.o \
+	decoder.o decode_header.o decode_tre.o decode_lbl.o decode_rgn.o \
+	decode_net.o decode_nod.o
+
+.SUFFIXES: .cc .o
+
+.cc.o:
+	$(CXX) -c $< $(CFLAGS) $(CPPFLAGS)
+
+imgdecode: $(OBJS)
+	$(CXX) -o $@ $(OBJS)
+
+clean:
+	rm -f *.o core *.core core.* imgdecode
+
+distclean: clean
+	rm -f Makefile Makefile.bak config.guess config.log config.status config.h
+
+spotless:
+	rm -rf autom4te.cache
+
