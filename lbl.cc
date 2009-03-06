@@ -121,7 +121,7 @@ string ImgLBL::char_6bit (byte_t byte, int *chset)
 	}
 
 	if ( ch == '~' ) {
-		char hex[4];
+		char hex[16];
 		sprintf(hex, "<%02x>", byte);
 		return (string) hex;
 	}
