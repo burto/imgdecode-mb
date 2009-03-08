@@ -330,7 +330,7 @@ class ImgLBL : public ImgSubfile {
 
 public:
 	struct sec_info_struct country_info, region_info, city_info,
-		poiprop_info, zip_info, unkn1_info, label_info,
+	  poiprop_info, zip_info, poi_index, poi_type_index, label_info,
 		hwy_info;
 	int omult, poiflags, ncities, nzips, encoding, sortlen;
 	bool zipisphone;
@@ -366,9 +366,9 @@ public:
 #define	LBL_COUNTRY_DEF	0x1002
 #define	LBL_REGION_DEF  0x1003
 #define	LBL_CITY_DEF    0x1004
-#define	LBL_UNKN1       0x1005
+#define	LBL_POI_INDEX   0x1005
 #define	LBL_POI_PROP    0x1006
-#define	LBL_UNKN2       0x1007
+#define	LBL_POI_TYPE_INDEX 0x1007
 #define	LBL_ZIP_DEF     0x1008
 #define	LBL_HWY_DEF     0x1009
 #define	LBL_EXIT_DEF    0x100A

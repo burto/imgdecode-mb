@@ -8,6 +8,8 @@ void decode_lbl_country_def ();
 void decode_lbl_region_def ();
 void decode_lbl_city_def ();
 void decode_lbl_zip ();
+void decode_lbl_poi_index ();
+void decode_lbl_poi_type_index ();
 void decode_lbl_poiprop ();
 void decode_lbl_hwy_def ();
 
@@ -85,14 +87,14 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 	dec->print("", img->get_udword());
 
 	offset= img->get_udword()+soffset;
-	dec->print("Unknown1 section at 0x%06lx", offset);
-	dec->print("Unknown1 section length %lu bytes",
+	dec->print("POI Index at 0x%06lx", offset);
+	dec->print("POI Index section length %lu bytes",
 		length= img->get_udword());
-	dec->print("Unknown1 record size %u bytes", rsize= img->get_uword());
-	if (length) ifile->offset_add(offset, LBL_UNKN1);
-	lbl->unkn1_info.length= length;
-	lbl->unkn1_info.offset= offset;
-	lbl->unkn1_info.offset= rsize;
+	dec->print("POI Index record size %u bytes", rsize= img->get_uword());
+	if (length) ifile->offset_add(offset, LBL_POI_INDEX);
+	lbl->poi_index.length= length;
+	lbl->poi_index.offset= offset;
+	lbl->poi_index.rsize= rsize;
 
 	dec->print("", img->get_udword());
 
@@ -143,11 +145,14 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 	dec->print("", img->get_byte());
 
 	offset= img->get_udword()+soffset;
-	dec->print("Unknown2 section at 0x%06lx", offset);
-	dec->print("Unknown2 section length %lu bytes",
+	dec->print("POI Type Index section at 0x%06lx", offset);
+	dec->print("POI Type Index section length %lu bytes",
 		length= img->get_udword());
-	dec->print("Unknown2 record size %u bytes", rsize= img->get_uword());
-	if (length) ifile->offset_add(offset, LBL_UNKN2);
+	dec->print("POI Type Index record size %u bytes", rsize= img->get_uword());
+	if (length) ifile->offset_add(offset, LBL_POI_TYPE_INDEX);
+	lbl->poi_type_index.length= length;
+	lbl->poi_type_index.offset= offset;
+	lbl->poi_type_index.rsize= rsize;
 
 	dec->print("", img->get_udword());
 
@@ -275,18 +280,20 @@ void decode_lbl_body ()
 			dec->banner("LBL: City definitions");
 			decode_lbl_city_def();
 			break;
-		case LBL_UNKN1:
-			dec->set_outfile("LBL", "unknown1");
-			dec->banner("LBL: Unknown 1");
+		case LBL_POI_INDEX:
+			dec->set_outfile("LBL", "poi_index");
+			dec->banner("LBL: POI Index");
+			decode_lbl_poi_index();
 			break;
 		case LBL_POI_PROP:
 			dec->set_outfile("LBL", "poi_properties");
 			dec->banner("LBL: POI Properties");
 			decode_lbl_poiprop();
 			break;
-		case LBL_UNKN2:
-			dec->set_outfile("LBL", "unknown2");
-			dec->banner("LBL: Unknown 2");
+		case LBL_POI_TYPE_INDEX:
+			dec->set_outfile("LBL", "poi_type_index");
+			dec->banner("LBL: POI Type Index");
+			decode_lbl_poi_type_index();
 			break;
 		case LBL_ZIP_DEF:
 			dec->set_outfile("LBL", "zipcodes");
@@ -381,8 +388,6 @@ void decode_lbl_country_def ()
 		country= ifile->label_get(loffset);
 		dec->comment("%s", country.c_str());
 //		img->country(n, &label);
-
-		++n;
 	}
 	dec->comment(NULL);
 }
@@ -461,6 +466,35 @@ void decode_lbl_zip ()
 		dec->print("Zip %u label at 0x%06x", n, offset);
 		dec->comment("%s", ifile->label_get(offset).c_str());
 		ifile->zip_add(n, label);
+	}
+}
+
+void decode_lbl_poi_index ()
+{
+	int nrecs= lbl->poi_index.length / lbl->poi_index.rsize;
+	int n;
+
+	for (n= 1; n<= nrecs; ++n) {
+		byte_t poi_index = img->get_byte();
+		uword_t poi_group_index = img->get_uword();
+		byte_t poi_sub_type = img->get_byte();
+
+		dec->print("POI Index %u is POI Index %u, Group Index %u, Sub Type %u",
+			   n, poi_index, poi_group_index, poi_sub_type);
+	}
+}
+
+void decode_lbl_poi_type_index ()
+{
+	int nrecs= lbl->poi_type_index.length / lbl->poi_type_index.rsize;
+	int n;
+
+	for (n= 1; n<= nrecs; ++n) {
+		byte_t type = img->get_byte();
+		udword_t start_index= img->get_uint24();
+
+		dec->print("POI Type Index %u is Type %u, Start Index %u",
+			   n, type, start_index);
 	}
 }
 
@@ -596,7 +630,20 @@ void decode_lbl_hwy_def ()
 	int n;
 
 	for (n= 1; n<= nrecs; ++n) {
-		dec->print("???", img->get_string(lbl->region_info.rsize).c_str());
+	  //		dec->print("???", img->get_string(lbl->region_info.rsize).c_str());
+		uword_t cidx;
+		udword_t loffset;
+		string label;
+
+		loffset= img->get_uint24();
+		dec->print("Highway %u: LBL offset 0x%06x", n, loffset);
+
+		label= ifile->label_get(loffset);
+		dec->comment("%s", label.c_str());
+
+		cidx= img->get_uword();
+		dec->print("In region %u", cidx);
+		dec->print("Unknown", img->get_byte());
 	}
 }
 
