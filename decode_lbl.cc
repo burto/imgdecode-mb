@@ -18,6 +18,8 @@ static class ImgFile *ifile;
 static class Decoder *dec;
 static class ImgLBL *lbl;
 
+int n_highways;
+int n_facilities;
 
 void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 {
@@ -108,14 +110,14 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 	if ( lbl->poiflags ) {
 		string s_flags;
 		bool has_street, has_street_num, has_city,
-			has_zip, has_phone, has_extra, has_u1, has_u2;
+			has_zip, has_phone, has_exit, has_u1, has_u2;
 
 		has_street_num=	lbl->poiflags & 0x1;
 		has_street=	lbl->poiflags & 0x2;
 		has_city=	lbl->poiflags & 0x4;
 		has_zip=	lbl->poiflags & 0x8;
 		has_phone=	lbl->poiflags & 0x10;
-		has_extra=	lbl->poiflags & 0x20;
+		has_exit=	lbl->poiflags & 0x20;
 		has_u1=		lbl->poiflags & 0x40;
 		has_u2=		lbl->poiflags & 0x80;
 
@@ -129,7 +131,7 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 		if ( has_city ) s_flags+= "city,";
 		if ( has_zip ) s_flags+= "zip,";
 		if ( has_phone ) s_flags+= "phone,";
-		if ( has_extra ) s_flags+= "xtra,";
+		if ( has_exit ) s_flags+= "exit,";
 		if ( has_u1 ) s_flags+= "unkn1,";
 		if ( has_u2 ) s_flags+= "unkn2,";
 
@@ -177,6 +179,7 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 	lbl->hwy_info.length= length;
 	lbl->hwy_info.offset= offset;
 	lbl->hwy_info.rsize= rsize;
+	n_highways = length / rsize;
 
 	dec->print("", img->get_udword());
 
@@ -186,6 +189,7 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 		length= img->get_udword());
 	dec->print("Exit record size %u bytes", rsize= img->get_uword());
 	if (length) ifile->offset_add(offset, LBL_EXIT_DEF);
+	n_facilities = length / rsize;
 
 	dec->print("", img->get_udword());
 
@@ -260,6 +264,11 @@ void decode_lbl_body ()
 		noffset= ifile->offset_next(img->tell());
 
 		switch (type) {
+
+		case 0:
+			printf("Can't find section at offset 0x%x\n", img->tell());
+			break;
+
 		case LBL_LABELS:
 			dec->set_outfile("LBL", "labels");
 			dec->banner("LBL: Labels");
@@ -508,7 +517,7 @@ void decode_lbl_poiprop ()
 	while ( img->tell() < eos ) {
 		byte_t flags;
 		bool has_street, has_street_num, has_city,
-			has_zip, has_phone, has_extra, has_u1, has_u2;
+			has_zip, has_phone, has_exit, has_u1, has_u2;
 
 		poi_data= img->get_uint24();
 		lbloffset= (poi_data & 0x3FFFFF);
@@ -517,9 +526,20 @@ void decode_lbl_poiprop ()
 		dec->print("Label offset 0x%06x", lbloffset);
 		dec->comment("%s", ifile->label_get(lbloffset).c_str());
 		if ( override ) {
-			flags= img->get_byte();
-			dec->print("%s override flags",
-				img->base(flags, 2, 8).c_str());
+			byte_t oflags= img->get_byte();
+			flags = 0;
+			int bit = 1;
+			for(int i = 0; i < 8; ++i) {
+			  while(!(lbl->poiflags & bit) && (bit < 256))
+			    bit <<= 1;
+			  if(oflags & (1 << i))
+			    flags |= bit;
+			  bit <<= 1;
+			}
+
+			dec->print("%s override flags -> %s",
+				   img->base(oflags, 2, 8).c_str(),
+				   img->base(flags, 2, 8).c_str());
 
 		} else flags= lbl->poiflags;
 
@@ -528,7 +548,7 @@ void decode_lbl_poiprop ()
 		has_city=	flags & 0x4;
 		has_zip=	flags & 0x8;
 		has_phone=	flags & 0x10;
-		has_extra=	flags & 0x20;
+		has_exit=	flags & 0x20;
 		has_u1=		flags & 0x40;
 		has_u2=		flags & 0x80;
 
@@ -547,7 +567,7 @@ void decode_lbl_poiprop ()
 			if ( has_city ) s_flags+= "city,";
 			if ( has_zip ) s_flags+= "zip,";
 			if ( has_phone ) s_flags+= "phone,";
-			if ( has_extra ) s_flags+= "xtra,";
+			if ( has_exit ) s_flags+= "exit,";
 			if ( has_u1 ) s_flags+= "unkn1,";
 			if ( has_u2 ) s_flags+= "unkn2,";
 
@@ -609,9 +629,23 @@ void decode_lbl_poiprop ()
 				dec->print("Ph num %s", phn.c_str());
 		}
 
-		if ( has_extra ) {
-			img->get_byte();
-			dec->print("xtra");
+		if ( has_exit ) {
+			lbloffset= img->get_uint24();
+			int overnightParking = (lbloffset & 0x400000) != 0;
+			int exitFacilities = (lbloffset & 0x800000) != 0;
+			lbloffset &= 0x3ffff;
+			dec->print("Exit lbl at 0x%06x", lbloffset);
+			dec->comment("%s", ifile->label_get(lbloffset).c_str());
+			dec->print("overnight parking %d, have facilites %d", overnightParking, exitFacilities);
+			int n;
+			if ( n_highways > 0xFF ) n= img->get_uword();
+			else n= img->get_byte();
+			dec->print("Highway idx 1 %lu", n);
+			if(exitFacilities) {
+			  if ( n_facilities > 0xFF ) n= img->get_uword();
+			  else n= img->get_byte();
+			  dec->print("Exit facility idx 1 %lu", n);
+			}
 		}
 
 		while ( (img->tell()-soffset) % lbl->omult &&
@@ -621,6 +655,12 @@ void decode_lbl_poiprop ()
 		}
 
 		dec->comment(NULL);
+	}
+
+	if ( img->tell() > eos ) {
+		fprintf(stderr, "POI prop overrun! eos = 0x%x, curPos = 0x%x\n",
+			eos, img->tell());
+		img->seek(eos);
 	}
 }
 
@@ -642,7 +682,7 @@ void decode_lbl_hwy_def ()
 		dec->comment("%s", label.c_str());
 
 		cidx= img->get_uword();
-		dec->print("In region %u", cidx);
+		dec->print("Offset in Highway Data %u", cidx);
 		dec->print("Unknown", img->get_byte());
 	}
 }
