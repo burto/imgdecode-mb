@@ -35,6 +35,8 @@ void decode_rgn_header (class Decoder *dec_in, class ImgRGN *rgn_in)
 		rgn->data_info.offset= img->get_udword()+soffset);
 	dec->print("Data length %ld bytes", 
 		rgn->data_info.length= img->get_udword());
+	if(rgn->hlen > 29)
+	  dec->print("???", img->get_string(rgn->hlen - 29).c_str());
 }
 
 void decode_rgn_body ()

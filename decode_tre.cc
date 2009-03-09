@@ -136,7 +136,8 @@ void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
 			length= img->get_udword());
 		dec->print("Unknown1 records %u bytes",
 			rsize= img->get_uword());
-		ifile->offset_add(offset, TRE_UNKN1);
+		if(length != 0)
+		  ifile->offset_add(offset, TRE_UNKN1);
 		tre->unknown1_info.offset= offset;
 		tre->unknown1_info.length= length;
 		tre->unknown1_info.rsize= rsize;
@@ -152,7 +153,8 @@ void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
 			offset= img->get_udword()+soffset);
 		dec->print("Unknown2 length %ld bytes",
 			length= img->get_udword());
-		ifile->offset_add(offset, TRE_UNKN2);
+		if(length != 0)
+		  ifile->offset_add(offset, TRE_UNKN2);
 		tre->unknown2_info.offset= offset;
 		tre->unknown2_info.length= length;
 

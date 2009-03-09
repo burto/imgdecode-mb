@@ -445,15 +445,18 @@ void decode_lbl_city_def ()
 		ridx= (cinfo & 0x3FFF);
 		pref= (cinfo & 0x8000);
 		
-		if ( pref ) dec->print("City %u is IdxPoint %u in subdiv %u",
-			n, cdata>>16, cdata&0xFFFF);
+		if ( pref ) {
+			dec->print("City %u is IdxPoint %u in subdiv %u",
+				   n, cdata>>16, cdata&0xFFFF);
+			label = "(CITY NAMED BY INDEXED POINT)";
+		}
 		else {
 			udword_t loffset= (udword_t) cdata;
 
 			dec->print("City %u label at 0x%06x", n, loffset);
 			label= ifile->label_get(loffset);
-			ifile->city_add(n, label, ridx);
 		}
+		ifile->city_add(n, label, ridx);
 
 		img->sbuffer_recall();
 		dec->print("in region %u", ridx);
