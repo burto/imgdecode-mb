@@ -65,9 +65,11 @@ void decode_net_header (class Decoder *dec_in, class ImgNET *net_in)
 	dec->print("???", img->get_udword());
 	dec->print("???", img->get_byte());
 	dec->print("???", img->get_byte());
-	dec->print("???", img->get_udword());
-	dec->print("???", img->get_udword());
-	dec->print("???", img->get_udword());
+	if(img->tell() < net->roads_info.offset) {
+	  dec->print("???", img->get_udword());
+	  dec->print("???", img->get_udword());
+	  dec->print("???", img->get_udword());
+	}
 
 	dec->banner("NET: End Header");
 }
