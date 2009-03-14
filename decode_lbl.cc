@@ -491,7 +491,7 @@ void decode_lbl_poi_index ()
 		uword_t poi_group_index = img->get_uword();
 		byte_t poi_sub_type = img->get_byte();
 
-		dec->print("POI Index %u is POI Index %u, Group Index %u, Sub Type %u",
+		dec->print("Entry %u is POI %u, Grp %u, SubType 0x%0.2x",
 			   n, poi_index, poi_group_index, poi_sub_type);
 	}
 }
@@ -505,7 +505,7 @@ void decode_lbl_poi_type_index ()
 		byte_t type = img->get_byte();
 		udword_t start_index= img->get_uint24();
 
-		dec->print("POI Type Index %u is Type %u, Start Index %u",
+		dec->print("Entry %u is Type 0x%0.2x, Start Index %u",
 			   n, type, start_index);
 	}
 }

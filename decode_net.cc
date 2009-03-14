@@ -133,18 +133,22 @@ void decode_net_roads ()
 		dec->print("???", img->get_uword());
 
 		repeat= true;
+		int recsPerLevel[32] = { 0 };
 		n= 0;
 		while ( repeat ) {
 			data= img->get_byte();
 			repeat= !(data&0x80);
+			recsPerLevel[n] = data & 0x7f;
 			++n;
 			dec->print("unknown, for idx %d?", n);
 		}
 
 		for (i= 0; i< n; ++i) {
-			roadinfo= img->get_uint24();
-			dec->print("Index %u, subdiv %u?",
-				(roadinfo&0xFF), (roadinfo&0xFFFF00)>>8);
+		  for(int j = 0; j < recsPerLevel[i]; ++j) {
+		    roadinfo= img->get_uint24();
+		    dec->print("Level %d, Index %u, subdiv %u?", i,
+			       (roadinfo&0xFF), (roadinfo&0xFFFF00)>>8);
+		  }
 		}
 
 		noffset= ifile->offset_next(img->tell());

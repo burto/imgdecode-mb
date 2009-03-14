@@ -147,7 +147,7 @@ void decode_tre_points (off_t oend, bool indexed)
 
 	while ( img->tell() < oend ) {
 		byte_t type, subtype;
-		bool has_subtype, is_poi;
+		bool has_subtype = 0, is_poi;
 		udword_t point_info, lbloffset;
 		word_t dx, dy;
 		string sinfo;
