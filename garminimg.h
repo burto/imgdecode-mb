@@ -231,6 +231,7 @@ struct sec_info_struct {
 };
 
 class ImgSubfile {
+	friend class ImgSRT;
 	friend class ImgTRE;
 	friend class ImgLBL;
 	friend class ImgRGN;
@@ -300,6 +301,14 @@ public:
 
 	void bits_per_coord (byte_t base, byte_t bfirst, bool extra_bit,
 		int *blong, int *blat, int *sbits);
+};
+
+class ImgSRT : public ImgSubfile {
+
+public:
+
+	ImgSRT (class ImgFile *ifilein, off_t offset);
+	~ImgSRT ();
 };
 
 class ImgTRE : public ImgSubfile {

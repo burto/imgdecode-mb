@@ -34,6 +34,8 @@ void ImgFile::subfile_add (string type, off_t offset, udword_t sz)
 		subfile= new ImgNET (this, offset);
 	} else if ( type == "NOD" ) {
 		subfile= new ImgNOD (this, offset);
+	} else if ( type == "SRT" ) {
+		subfile= new ImgSRT (this, offset);
 	} else {
 		fprintf(stderr, "Unknown subfile %s\n", type.c_str());
 		return;

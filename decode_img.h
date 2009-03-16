@@ -22,4 +22,7 @@ void decode_net_body ();
 void decode_nod_header (class Decoder *dec, class ImgNOD *sub);
 void decode_nod_body ();
 
+void decode_srt_header (class Decoder *dec, class ImgSRT *sub);
+void decode_srt_body ();
+
 #endif

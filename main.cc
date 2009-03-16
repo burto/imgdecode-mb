@@ -26,6 +26,10 @@ int main (int argc, char *argv[])
 		class ImgRGN *rgn;
 		class ImgNET *net;
 		class ImgNOD *nod;
+		class ImgSRT *srt;
+
+		srt= (ImgSRT *) ifile->subfile_find("SRT");
+		if ( srt ) decode_srt_header(&dec, srt);
 
 		tre = (ImgTRE *) ifile->subfile_find("TRE");
 		if(tre != NULL)
