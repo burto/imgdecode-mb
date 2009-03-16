@@ -10,7 +10,7 @@ static class ImgNET *net;
 static class Decoder *dec;
 
 void decode_net_roads ();
-void decode_net_unkn2 ();
+void decode_net_road_index ();
 
 void decode_net_header (class Decoder *dec_in, class ImgNET *net_in)
 {
@@ -51,16 +51,16 @@ void decode_net_header (class Decoder *dec_in, class ImgNET *net_in)
 	net->unknown1_info.offset= offset;
 	net->unknown1_info.length= length;
 
-	dec->print("Unknown2 at offset 0x%08x", 
+	dec->print("Road index at offset 0x%08x", 
 		offset= img->get_udword()+soffset);
-	dec->print("Unknown2 length %ld bytes",
+	dec->print("Road index length %ld bytes",
 		length= img->get_udword());
-	dec->print("Unknown2 record size %u bytes", 
+	dec->print("Road index record size %u bytes", 
 		rsize= img->get_uword());
 	ifile->offset_add(offset, NET_UNKN1);
-	net->unknown2_info.offset= offset;
-	net->unknown2_info.length= length;
-	net->unknown2_info.rsize= rsize;
+	net->road_index_info.offset= offset;
+	net->road_index_info.length= length;
+	net->road_index_info.rsize= rsize;
 
 	dec->print("???", img->get_udword());
 	dec->print("???", img->get_byte());
@@ -82,7 +82,7 @@ void decode_net_body ()
 
 	// Unknow section 2.  I think these may be intersections.
 
-	decode_net_unkn2 ();
+	decode_net_road_index ();
 }
 
 void decode_net_roads ()
@@ -159,21 +159,21 @@ void decode_net_roads ()
 	}
 }
 
-void decode_net_unkn2 ()
+void decode_net_road_index ()
 {
-	off_t soffset= net->unknown2_info.offset;
-	off_t eoffset= soffset+net->unknown2_info.length;
-	uword_t nrecs= net->unknown2_info.length/net->unknown2_info.rsize;
+	off_t soffset= net->road_index_info.offset;
+	off_t eoffset= soffset+net->road_index_info.length;
+	uword_t nrecs= net->road_index_info.length/net->road_index_info.rsize;
 	uword_t i;
 
-	img->seek(net->unknown2_info.offset);
-	dec->set_outfile("NET", "unknown2");
-	dec->banner("NET: Unknown Section 2 (Intersections?)");
+	img->seek(net->road_index_info.offset);
+	dec->set_outfile("NET", "road_index");
+	dec->banner("NET: Road Index");
 
 	for (i= 1; i<= nrecs; ++i) {
 		dec->comment("Record %u", i);
 
-		dec->print("Offset 0x%06x ?", (img->get_uint24()&0x3FFFFF));
+		dec->print("Road Offset 0x%06x ?", (img->get_uint24()&0x3FFFFF));
 		dec->comment(NULL);
 	}
 }

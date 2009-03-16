@@ -280,7 +280,7 @@ public:
 
 class ImgNET : public ImgSubfile {
 public:
-	struct sec_info_struct roads_info, unknown1_info, unknown2_info;
+	struct sec_info_struct roads_info, unknown1_info, road_index_info;
 	int omult;
 
 	ImgNET (class ImgFile *ifilein, off_t offset);
