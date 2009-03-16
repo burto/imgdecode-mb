@@ -447,7 +447,7 @@ void decode_lbl_city_def ()
 		
 		if ( pref ) {
 			dec->print("City %u is IdxPoint %u in subdiv %u",
-				   n, cdata>>16, cdata&0xFFFF);
+				   n, cdata&0xff, cdata>>8);
 			label = "(CITY NAMED BY INDEXED POINT)";
 		}
 		else {
