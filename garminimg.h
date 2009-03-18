@@ -389,7 +389,7 @@ public:
 #define NET_ROAD_DEF	0x2001
 #define NET_ROAD_REC	0x2002
 #define NET_UNKN1	0x2003
-#define NET_UNKN2	0x2004
+#define NET_ROAD_INDEX	0x2004
 
 #define NOD_UNKN1	0x3001
 #define NOD_UNKN2	0x3002

@@ -57,7 +57,7 @@ void decode_net_header (class Decoder *dec_in, class ImgNET *net_in)
 		length= img->get_udword());
 	dec->print("Road index record size %u bytes", 
 		rsize= img->get_uword());
-	ifile->offset_add(offset, NET_UNKN1);
+	ifile->offset_add(offset, NET_ROAD_INDEX);
 	net->road_index_info.offset= offset;
 	net->road_index_info.length= length;
 	net->road_index_info.rsize= rsize;
