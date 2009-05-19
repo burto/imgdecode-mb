@@ -643,7 +643,7 @@ void decode_lbl_poiprop ()
 			int n;
 			if ( n_highways > 0xFF ) n= img->get_uword();
 			else n= img->get_byte();
-			dec->print("Highway idx 1 %lu", n);
+			dec->print("Highway idx %lu", n);
 			if(exitFacilities) {
 			  if ( n_facilities > 0xFF ) n= img->get_uword();
 			  else n= img->get_byte();
