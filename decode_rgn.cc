@@ -159,7 +159,7 @@ void decode_tre_points (off_t oend, bool indexed)
 		point_info= img->get_uint24();
 		has_subtype= (point_info & 0x800000);
 		is_poi=      (point_info & 0x400000);
-		lbloffset=   (point_info & 0x3FFFFF);
+		lbloffset=   (point_info & 0x1FFFFF);
 
 		if ( is_poi ) {
 			dec->print("POI offset 0x%06x in LBL", lbloffset);
