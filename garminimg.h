@@ -385,6 +385,8 @@ public:
 #define	LBL_SORT_DESC   0x100C
 #define	LBL_UNKN3       0x100D
 #define	LBL_UNKN4       0x100E
+#define	LBL_UNKN5       0x100F
+#define	LBL_UNKN6       0x1010
 
 #define NET_ROAD_DEF	0x2001
 #define NET_ROAD_REC	0x2002

@@ -223,14 +223,39 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 
 	dec->print("", img->get_uword());
 
-	offset= img->get_udword()+soffset;
-	dec->print("Unknown4 section at 0x%06lx", offset);
-	dec->print("Unknown4 section length %lu bytes",
-		length= img->get_udword());
-	dec->print("Unknown4 record size %u bytes", rsize= img->get_uword());
-	if (length) ifile->offset_add(offset, LBL_UNKN4);
+	if(lbl->hlen > 196) {
+	  offset= img->get_udword()+soffset;
+	  dec->print("Unknown4 section at 0x%06lx", offset);
+	  dec->print("Unknown4 section length %lu bytes",
+		     length= img->get_udword());
+	  dec->print("Unknown4 record size %u bytes", rsize= img->get_uword());
+	  if (length) ifile->offset_add(offset, LBL_UNKN4);
 
-	dec->print("", img->get_uword());
+	  dec->print("", img->get_uword());
+	}
+
+	if(lbl->hlen > 208) {
+	  offset= img->get_udword()+soffset;
+	  dec->print("Unknown5 section at 0x%06lx", offset);
+	  dec->print("Unknown5 section length %lu bytes",
+		     length= img->get_udword());
+	  dec->print("Unknown5 record size %u bytes", rsize= img->get_uword());
+	  if (length) ifile->offset_add(offset, LBL_UNKN5);
+
+	  dec->print("", img->get_uword());
+	  dec->print("", img->get_uword());
+	}
+
+	if(lbl->hlen > 222) {
+	  offset= img->get_udword()+soffset;
+	  dec->print("Unknown6 section at 0x%06lx", offset);
+	  dec->print("Unknown6 section length %lu bytes",
+		     length= img->get_udword());
+	  dec->print("Unknown6 record size %u bytes", rsize= img->get_uword());
+	  if (length) ifile->offset_add(offset, LBL_UNKN6);
+
+	  dec->print("", img->get_uword());
+	}
 
 //	offset= ifile->offset_next(img->tell());
 	offset= soffset + lbl->hlen;
