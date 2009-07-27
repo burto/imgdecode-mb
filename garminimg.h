@@ -293,6 +293,9 @@ class ImgRGN : public ImgSubfile {
 	int _bits_per_coord (byte_t base, bool is_signed, bool extra_bit);
 public:
 	struct sec_info_struct data_info;
+	struct sec_info_struct ext_type_polygons;
+	struct sec_info_struct ext_type_polylines;
+	struct sec_info_struct ext_type_points;
 
 	ImgRGN (class ImgFile *ifilein, off_t offset);
 	~ImgRGN ();

@@ -35,8 +35,25 @@ void decode_rgn_header (class Decoder *dec_in, class ImgRGN *rgn_in)
 		rgn->data_info.offset= img->get_udword()+soffset);
 	dec->print("Data length %ld bytes", 
 		rgn->data_info.length= img->get_udword());
-	if(rgn->hlen > 29)
-	  dec->print("???", img->get_string(rgn->hlen - 29).c_str());
+	if(rgn->hlen > 29) {
+	  dec->print("Ext Type Polygons at offset 0x%08x", 
+		     rgn->ext_type_polygons.offset= img->get_udword()+soffset);
+	  dec->print("Ext Type Polygons length %ld bytes", 
+		     rgn->ext_type_polygons.length= img->get_udword());
+	  dec->print("???", img->get_string(20).c_str());
+	  dec->print("Ext Type Polylines at offset 0x%08x", 
+		     rgn->ext_type_polylines.offset= img->get_udword()+soffset);
+	  dec->print("Ext Type Polylines length %ld bytes", 
+		     rgn->ext_type_polygons.length= img->get_udword());
+	  dec->print("???", img->get_string(20).c_str());
+	  dec->print("Ext Type Points at offset 0x%08x", 
+		     rgn->ext_type_points.offset= img->get_udword()+soffset);
+	  dec->print("Ext Type Points length %ld bytes", 
+		     rgn->ext_type_points.length= img->get_udword());
+	  dec->print("???", img->get_string(32).c_str());
+	}
+	if(rgn->hlen > 125)
+	  dec->print("???", img->get_string(rgn->hlen - 125).c_str());
 }
 
 void decode_rgn_body ()

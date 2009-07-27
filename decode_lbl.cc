@@ -110,7 +110,7 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 	if ( lbl->poiflags ) {
 		string s_flags;
 		bool has_street, has_street_num, has_city,
-			has_zip, has_phone, has_exit, has_u1, has_u2;
+		  has_zip, has_phone, has_exit, has_tide_prediction, has_11_base_number;
 
 		has_street_num=	lbl->poiflags & 0x1;
 		has_street=	lbl->poiflags & 0x2;
@@ -118,8 +118,8 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 		has_zip=	lbl->poiflags & 0x8;
 		has_phone=	lbl->poiflags & 0x10;
 		has_exit=	lbl->poiflags & 0x20;
-		has_u1=		lbl->poiflags & 0x40;
-		has_u2=		lbl->poiflags & 0x80;
+		has_tide_prediction=  lbl->poiflags & 0x40;
+		has_11_base_number= lbl->poiflags & 0x80;
 
 		if ( lbl->zipisphone && has_zip && ! has_phone ) {
 			has_zip= 0;
@@ -132,8 +132,8 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 		if ( has_zip ) s_flags+= "zip,";
 		if ( has_phone ) s_flags+= "phone,";
 		if ( has_exit ) s_flags+= "exit,";
-		if ( has_u1 ) s_flags+= "unkn1,";
-		if ( has_u2 ) s_flags+= "unkn2,";
+		if ( has_tide_prediction ) s_flags+= "tide prediction,";
+		if ( has_11_base_number ) s_flags+= "11-base number,";
 
 		s_flags.erase(s_flags.size()-1);
 		dec->print("%s POIs: %s", img->base(lbl->poiflags,
@@ -545,7 +545,7 @@ void decode_lbl_poiprop ()
 	while ( img->tell() < eos ) {
 		byte_t flags;
 		bool has_street, has_street_num, has_city,
-			has_zip, has_phone, has_exit, has_u1, has_u2;
+		  has_zip, has_phone, has_exit, has_tide_prediction, has_11_base_number;
 
 		poi_data= img->get_uint24();
 		lbloffset= (poi_data & 0x3FFFFF);
@@ -577,8 +577,8 @@ void decode_lbl_poiprop ()
 		has_zip=	flags & 0x8;
 		has_phone=	flags & 0x10;
 		has_exit=	flags & 0x20;
-		has_u1=		flags & 0x40;
-		has_u2=		flags & 0x80;
+		has_tide_prediction=flags & 0x40;
+		has_11_base_number=flags & 0x80;
 
 /*
 		if ( lbl->zipisphone && has_zip && ! has_phone ) {
@@ -596,8 +596,8 @@ void decode_lbl_poiprop ()
 			if ( has_zip ) s_flags+= "zip,";
 			if ( has_phone ) s_flags+= "phone,";
 			if ( has_exit ) s_flags+= "exit,";
-			if ( has_u1 ) s_flags+= "unkn1,";
-			if ( has_u2 ) s_flags+= "unkn2,";
+			if ( has_tide_prediction ) s_flags+= "tide prediction,";
+			if ( has_11_base_number ) s_flags+= "11-base number,";
 
 			if ( s_flags.size() )
 				s_flags.erase(s_flags.size()-1);
