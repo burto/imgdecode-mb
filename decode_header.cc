@@ -82,8 +82,15 @@ int decode_header (class Decoder *dec)
 
 	dec->rawprint("*\n");
 
-	int off = (img->block_size() > 512)? 0x1000 : 0x0400;
+	//	int off = (img->block_size() > 512)? 0x1000 : 0x0400;
 
+	int off = 0x0400;
+	img->seek(off);
+
+	while(img->get_byte() != 0x01 && (off < 0x1000)) {
+	  off += 0x0400;
+	  img->seek(off);
+	}
 	img->seek(off);
 
 	dec->print("???", img->get_byte());
