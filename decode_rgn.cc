@@ -158,8 +158,8 @@ void decode_tre_points (off_t oend, bool indexed)
 	uword_t idx= 1;
 
 	dec->comment(NULL);
-	if (indexed) dec->comment("Indexed Points");
-	else dec->comment("Points");
+	if (indexed) dec->comment("Indexed Points to 0x%08x", oend);
+	else dec->comment("Points to 0x%08x", oend);
 	dec->comment(NULL);
 
 	while ( img->tell() < oend ) {
@@ -214,8 +214,8 @@ void decode_tre_poly (off_t oend, bool line)
 	int n= 1;
 
 	dec->comment(NULL);
-	if (line) dec->comment("Polylines");
-	else dec->comment("Polygons");
+	if (line) dec->comment("Polylines to 0x%08x", oend);
+	else dec->comment("Polygons to 0x%08x", oend);
 	dec->comment(NULL);
 
 	while ( img->tell() < oend ) {

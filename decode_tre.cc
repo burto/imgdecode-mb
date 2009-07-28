@@ -16,7 +16,7 @@ static void decode_tre_polylines();
 static void decode_tre_polygons();
 static void decode_tre_points();
 static void decode_tre_copyrights ();
-static void decode_tre_unknown1 ();
+static void decode_tre_object_groups ();
 static void decode_tre_unknown2 ();
 
 void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
@@ -123,31 +123,26 @@ void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
 
 	eoffset= soffset+tre->hlen;
 	if ( img->tell() < eoffset ) 
-		dec->print("Map ID?", img->get_udword());
+		dec->print("Map ID", img->get_udword());
 
 	// Only present in locked maps?
 
 	if ( img->tell() < eoffset) {
 		dec->print("???", img->get_udword());
 
-		dec->print("Unknown1 at offset 0x%08x", 
+		dec->print("Object Groups at offset 0x%08x", 
 			offset= img->get_udword()+soffset);
-		dec->print("Unknown1 length %ld bytes",
+		dec->print("Object Groups length %ld bytes",
 			length= img->get_udword());
-		dec->print("Unknown1 records %u bytes",
+		dec->print("Object Groups records %u bytes",
 			rsize= img->get_uword());
 		if(length != 0)
-		  ifile->offset_add(offset, TRE_UNKN1);
-		tre->unknown1_info.offset= offset;
-		tre->unknown1_info.length= length;
-		tre->unknown1_info.rsize= rsize;
+		  ifile->offset_add(offset, TRE_OBJECT_GROUPS);
+		tre->object_groups_info.offset= offset;
+		tre->object_groups_info.length= length;
+		tre->object_groups_info.rsize= rsize;
 
 		dec->print("???", img->get_udword());
-		dec->print("???", img->get_udword());
-		dec->print("???", img->get_udword());
-		dec->print("???", img->get_udword());
-		dec->print("???", img->get_udword());
-		dec->print("???", img->get_string(20).c_str());
 
 		dec->print("Unknown2 at offset 0x%08x", 
 			offset= img->get_udword()+soffset);
@@ -161,7 +156,12 @@ void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
 		tre->unknown2_info.length= length;
 		tre->unknown2_info.rsize= rsize;
 
-		dec->print("???", img->get_string(eoffset-img->tell()).c_str());
+		dec->print("Num extended polyline types", img->get_uword());
+		dec->print("Num extended polygon types", img->get_uword());
+		dec->print("Num extended point types", img->get_uword());
+
+		if ( img->tell() < eoffset)
+		  dec->print("???", img->get_string(eoffset-img->tell()).c_str());
 	}
 
 	dec->banner("TRE: End Header");
@@ -223,7 +223,7 @@ void decode_tre_body ()
 
 	// Unknown stuff
 
-	decode_tre_unknown1();
+	decode_tre_object_groups();
 
 	decode_tre_unknown2();
 }
@@ -551,13 +551,21 @@ static void decode_tre_copyrights ()
 	}
 }
 
-static void decode_tre_unknown1 ()
+static void decode_tre_object_groups()
 {
-	img->seek(tre->unknown1_info.offset);
-	dec->set_outfile("TRE", "unknown1");
-	dec->banner("TRE: Unknown section 1");
+	int nrecs= tre->object_groups_info.length/tre->object_groups_info.rsize;
+	int n;
+	img->seek(tre->object_groups_info.offset);
+	dec->set_outfile("TRE", "object_groups");
+	dec->banner("TRE: Object Groups");
 
-	dec->print("???", img->get_string(tre->unknown1_info.length).c_str());
+	for (n= 1; n<= nrecs; ++n) {
+	  dec->print("Record #%d", n);
+	  dec->print("Polygons  Offset 0x%08x", img->get_udword());
+	  dec->print("Polylines Offset 0x%08x", img->get_udword());
+	  dec->print("Points    Offset 0x%08x", img->get_udword());
+	  dec->print("Objects          %u", img->get_byte());
+	}
 }
 
 static void decode_tre_unknown2 ()

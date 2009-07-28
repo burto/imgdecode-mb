@@ -318,7 +318,7 @@ class ImgTRE : public ImgSubfile {
 
 public:
 	struct sec_info_struct levels_info, subdiv_info, polyline_info,
-		polygon_info, point_info, copyright_info, unknown1_info,
+		polygon_info, point_info, copyright_info, object_groups_info,
 		unknown2_info;
 	int nlevels, nsubdivisions;
 
@@ -371,7 +371,7 @@ public:
 #define TRE_POLYGON	0x0004
 #define TRE_POINT	0x0005
 #define TRE_COPYRIGHT	0x0006
-#define TRE_UNKN1	0x0007
+#define TRE_OBJECT_GROUPS 0x0007
 #define TRE_UNKN2	0x0008
 
 #define	LBL_LABELS      0x1001
