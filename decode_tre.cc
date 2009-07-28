@@ -362,15 +362,16 @@ static void decode_tre_subdivs ()
 		dec->comment("%u subdivisions", tre->nsubdivisions);
 		dec->comment(NULL);
 
-		for (i= tre->nlevels-1; i>= 0; --i) {
+		for (i= 15; i>= 0; --i) {
 			map_level_t level;
 
 			recsz= ( i ) ? 16 : 14;
-			ifile->level_get(i, &level);
+			if(ifile->level_get(i, &level) < 0)
+			  continue;
 
 			nsubdivisions= level.nsubdiv;
 
-			dec->comment("Map Level %u", i);
+			dec->comment("Map Level %u (%d subdivisions)", i, nsubdivisions);
 			dec->comment(NULL);
 
 			for (n= 0; n< nsubdivisions; ++n) {
