@@ -228,6 +228,7 @@ public:
 
 	void subdivision_add (uword_t n, map_subdivision_t *subdiv);
 	int subdivision_get (uword_t n, map_subdivision_t *subdiv);
+	map_subdivision_t *subdivision_get (uword_t n);
 	uword_t nsubdivisions ();
 };
 

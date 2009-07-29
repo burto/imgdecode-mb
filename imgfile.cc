@@ -309,6 +309,16 @@ int ImgFile::subdivision_get (uword_t n, map_subdivision_t *subdiv)
 	return 0;
 }
 
+map_subdivision_t *ImgFile::subdivision_get (uword_t n)
+{
+	subdivisions_t::iterator spos;
+
+	spos= subdivisions.find(n);
+	if ( spos == subdivisions.end() ) return NULL;
+
+	return &spos->second;
+}
+
 uword_t ImgFile::nsubdivisions ()
 {
 	return subdivisions.size();
