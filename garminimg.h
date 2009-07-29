@@ -136,6 +136,13 @@ struct subdivision_struct {
 	uword_t last;
 	uword_t next_level_idx;
 	byte_t shiftby;
+	udword_t ext_type_polygon_off;
+	udword_t ext_type_polygon_len;
+	udword_t ext_type_polyline_off;
+	udword_t ext_type_polyline_len;
+	udword_t ext_type_point_off;
+	udword_t ext_type_point_len;
+	byte_t ext_type_objects;
 };
 typedef struct subdivision_struct map_subdivision_t;
 
