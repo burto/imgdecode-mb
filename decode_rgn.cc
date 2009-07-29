@@ -13,6 +13,10 @@ void decode_rgn_subdiv (uword_t i, int *level);
 void decode_tre_points (off_t oend, bool indexed);
 void decode_tre_poly (off_t oend, bool line);
 
+void decode_ext_type_polygons(udword_t off, udword_t len);
+void decode_ext_type_polylines(udword_t off, udword_t len);
+void decode_ext_type_points(udword_t off, udword_t len);
+
 void decode_rgn_header (class Decoder *dec_in, class ImgRGN *rgn_in)
 {
 	off_t soffset;
@@ -150,6 +154,16 @@ void decode_rgn_subdiv (uword_t i, int *level)
 
 	if ( SUB_HAS_POLYGON(subdiv.elements) ) {
 		decode_tre_poly(eoffset, false);
+	}
+
+	if (subdiv.ext_type_polygon_len != 0) {
+	  decode_ext_type_polygons(subdiv.ext_type_polygon_off, subdiv.ext_type_polygon_len);
+	}
+	if (subdiv.ext_type_polyline_len != 0) {
+	  decode_ext_type_polylines(subdiv.ext_type_polyline_off, subdiv.ext_type_polyline_len);
+	}
+	if (subdiv.ext_type_point_len != 0) {
+	  decode_ext_type_points(subdiv.ext_type_point_off, subdiv.ext_type_point_len);
 	}
 }
 
@@ -293,3 +307,84 @@ void decode_tre_poly (off_t oend, bool line)
 	}
 }
 
+void decode_ext_type_polygons(udword_t off, udword_t len) {
+  dec->comment("ExtType areas off 0x%08x, len %u", off, len);
+  dec->comment(NULL);
+}
+
+void decode_ext_type_polylines(udword_t off, udword_t len) {
+  dec->comment("ExtType lines off 0x%08x, len %u", off, len);
+  dec->comment(NULL);
+}
+
+void decode_ext_type_points(udword_t off, udword_t len) {
+
+  dec->comment("ExtType points off 0x%08x, len %u", off, len);
+  dec->comment(NULL);
+
+  off_t start = rgn->ext_type_points.offset + off;
+  off_t oend = start + len;
+  img->seek(start);
+
+  while ( img->tell() < oend ) {
+    byte_t type, subtype;
+    word_t dx, dy;
+
+    type = img->get_byte();
+    dec->print("Type 0x%02x", type);
+    subtype = img->get_byte();
+    bool has_label = (subtype & 0x20) != 0;
+    bool unk1 = (subtype & 0x40) != 0;
+    bool has_extra_byte = (subtype & 0x80) != 0;
+    subtype &= 0x1f;
+    dec->print("SubType 0x%02x", subtype);
+
+    dec->comment("Extended Type 0x%06x", 0x10000 | (type << 8) | subtype);
+
+    dx= img->get_word();
+    dec->print("long delta %d units (unshifted)", dx);
+    dy= img->get_word();
+    dec->print("lat delta %d units (unshifted)", dy);
+
+    if(has_label) {
+      int lab_off = img->get_uint24();
+      bool is_poi = (lab_off & 0x400000) != 0;
+      lab_off &= 0x3ffff;
+      if ( is_poi ) {
+	dec->print("POI offset 0x%06x in LBL", lab_off);
+      } else  {
+	dec->print("label offset 0x%06x in LBL", lab_off);
+      }
+      if ( is_poi )
+	dec->comment("%s", ifile->poi_get_name(lab_off).c_str());
+      else
+	dec->comment("%s", ifile->label_get(lab_off).c_str());
+    }
+    if(has_extra_byte) {
+      byte_t extra = img->get_byte();
+      dec->print("extra[0] 0x%02x", extra);
+      if((extra & 0xe0) == 0x80) {
+	dec->print("extra[1] 0x%02x", img->get_byte());
+      }
+      else if((extra & 0xe0) == 0xa0) {
+	dec->print("extra[1] 0x%02x", img->get_byte());
+	dec->print("extra[2] 0x%02x", img->get_byte());
+      }
+      else if((extra & 0xe0) == 0xe0) {
+	byte_t extra1 = img->get_byte();
+	dec->print("extra[1] 0x%02x", extra1);
+	int n = extra1 >> 1;
+	dec->print("extra[2..%d]", n + 1, img->get_string(n).c_str());
+      }
+      else if((extra & 0xe0) != 0) {
+	dec->comment("*** Unrecognised extra[0] format ***");
+      }
+    }
+    dec->comment(NULL);
+  }
+
+  if(img->tell() != oend) {
+    dec->comment("*** OUT OF SYNC %u != %u ***", img->tell(), oend);
+    dec->comment(NULL);
+  }
+}
