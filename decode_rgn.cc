@@ -360,7 +360,7 @@ void decode_ext_type_points(udword_t off, udword_t len) {
       if ( is_poi ) {
 	dec->print("POI offset 0x%06x in LBL", lab_off);
       } else  {
-	dec->print("label offset 0x%06x in LBL", lab_off);
+	dec->print("Label offset 0x%06x in LBL", lab_off);
       }
       if ( is_poi )
 	dec->comment("%s", ifile->poi_get_name(lab_off).c_str());
@@ -370,21 +370,36 @@ void decode_ext_type_points(udword_t off, udword_t len) {
     if(has_extra_byte) {
       byte_t extra = img->get_byte();
       dec->print("extra[0] 0x%02x", extra);
-      if((extra & 0xe0) == 0x80) {
+
+      switch((extra >> 5) & 7) {
+
+      case 0:
+      case 1:
+      case 2:
+	// no further extra data
+	break;
+
+      case 4:
 	dec->print("extra[1] 0x%02x", img->get_byte());
-      }
-      else if((extra & 0xe0) == 0xa0) {
+	break;
+
+      case 5:
 	dec->print("extra[1] 0x%02x", img->get_byte());
 	dec->print("extra[2] 0x%02x", img->get_byte());
-      }
-      else if((extra & 0xe0) == 0xe0) {
-	byte_t extra1 = img->get_byte();
-	dec->print("extra[1] 0x%02x", extra1);
-	int n = extra1 >> 1;
-	dec->print("extra[2..%d]", n + 1, img->get_string(n).c_str());
-      }
-      else if((extra & 0xe0) != 0) {
-	dec->comment("*** Unrecognised extra[0] format ***");
+	break;
+
+      case 7:
+	{
+	  byte_t extra1 = img->get_byte();
+	  dec->print("extra[1] 0x%02x", extra1);
+	  int n = extra1 >> 1;
+	  dec->print("extra[2..%d]", n + 1, img->get_string(n).c_str());
+	}
+	break;
+
+      default:
+	dec->comment("*** Unrecognised extra[0] format 0x%02x ***", extra);
+	break;
       }
     }
     dec->comment(NULL);
