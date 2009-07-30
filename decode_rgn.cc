@@ -339,7 +339,9 @@ void decode_ext_type_points(udword_t off, udword_t len) {
     subtype &= 0x1f;
     dec->print("SubType 0x%02x", subtype);
 
-    dec->comment("Extended Type 0x%06x", 0x10000 | (type << 8) | subtype);
+    udword_t extType = 0x10000 | (type << 8) | subtype;
+    dec->comment("Extended Type 0x%06x", extType);
+    dec->comment("%s", img->elem_marine_point_name(extType & 0xffff).c_str());
 
     dx= img->get_word();
     dec->print("long delta %d units (unshifted)", dx);

@@ -43,6 +43,9 @@ GarminImg::GarminImg ()
 
 	for (eptr= point_data; eptr->type; ++eptr) 
 		points_byname.insert(make_pair(eptr->type, eptr->name));
+
+	for (eptr= marine_point_data; eptr->type; ++eptr) 
+		marine_points_byname.insert(make_pair(eptr->type, eptr->name));
 }
 
 GarminImg::~GarminImg ()
@@ -506,5 +509,13 @@ string GarminImg::elem_point_name (uword_t type, uword_t subtype)
 
 	ppos= points_byname.find(fulltype);
 	return ( ppos == points_byname.end() ) ? "unknown" : ppos->second;
+}
+
+string GarminImg::elem_marine_point_name (uword_t type)
+{
+	point_name_t::iterator ppos;
+
+	ppos= marine_points_byname.find(type);
+	return ( ppos == marine_points_byname.end() ) ? "unknown" : ppos->second;
 }
 
