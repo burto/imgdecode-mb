@@ -312,14 +312,147 @@ void decode_tre_poly (off_t oend, bool line)
 	}
 }
 
+void decode_ext_type_extra_bytes() {
+
+  byte_t extra = img->get_byte();
+  dec->print("extra[0] 0x%02x", extra);
+
+  switch((extra >> 5) & 7) {
+
+  case 0:
+  case 1:
+  case 2:
+    // no further extra data
+    break;
+    
+  case 4:
+    dec->print("extra[1] 0x%02x", img->get_byte());
+    break;
+
+  case 5:
+    dec->print("extra[1] 0x%02x", img->get_byte());
+    dec->print("extra[2] 0x%02x", img->get_byte());
+    break;
+
+  case 7:
+    {
+      byte_t extra1 = img->get_byte();
+      dec->print("extra[1] 0x%02x", extra1);
+      int n = extra1 >> 1;
+      dec->print("extra[2..%d]", n + 1, img->get_string(n).c_str());
+    }
+    break;
+
+  default:
+    dec->comment("*** Unrecognised extra[0] format 0x%02x ***", extra);
+    break;
+  }
+}
+
+void decode_ext_type_poly(bool is_polygon) {
+    byte_t type, subtype;
+    word_t dx, dy;
+
+    type = img->get_byte();
+    dec->print("Type 0x%02x", type);
+    subtype = img->get_byte();
+    bool has_label = (subtype & 0x20) != 0;
+    bool unk1 = (subtype & 0x40) != 0;
+    bool has_extra_byte = (subtype & 0x80) != 0;
+    subtype &= 0x1f;
+    dec->print("SubType 0x%02x", subtype);
+
+    udword_t extType = 0x10000 | (type << 8) | subtype;
+    dec->comment("Extended Type 0x%06x", extType);
+    if(is_polygon)
+      dec->comment("%s", img->elem_marine_polygon_name(extType & 0xffff).c_str());
+    else
+      dec->comment("%s", img->elem_marine_polyline_name(extType & 0xffff).c_str());
+
+    dx= img->get_word();
+    dec->print("long delta %d units (unshifted)", dx);
+    dy= img->get_word();
+    dec->print("lat delta %d units (unshifted)", dy);
+
+    uword_t bstream_len = img->get_byte();
+    if ( (bstream_len & 1) == 0 ) {
+      // two byte length
+      bstream_len |= img->get_byte() << 8;
+      bstream_len = (bstream_len >> 2) - 1;
+    } else {
+      bstream_len= (bstream_len >> 1) - 1;
+    }
+    dec->print("Bitsteam %u bytes", bstream_len);
+    
+    byte_t bstream_info= img->get_byte();
+    dec->print("Base %u/%u bits per long/lat",
+	       bstream_info&0xF, (bstream_info&0xF0)>>4);
+
+    string bitstream= img->get_string(bstream_len);
+    int bx, by, bs;
+    bool extra_bit = false;
+    rgn->bits_per_coord(bstream_info, bitstream[0],
+			extra_bit, &bx, &by, &bs);
+    
+    dec->print("%u/%u bits per long/lat, %u setup", bx, by, bs,
+	       bitstream.c_str());
+    dec->comment("%u point(s)", (8*bstream_len-bs)/(bx+by));
+
+    if(has_label) {
+      int lab_off = img->get_uint24();
+      bool is_poi = (lab_off & 0x400000) != 0;
+      lab_off &= 0x3ffff;
+      if ( is_poi ) {
+	dec->print("POI offset 0x%06x in LBL", lab_off);
+      } else  {
+	dec->print("Label offset 0x%06x in LBL", lab_off);
+      }
+      if ( is_poi )
+	dec->comment("%s", ifile->poi_get_name(lab_off).c_str());
+      else
+	dec->comment("%s", ifile->label_get(lab_off).c_str());
+    }
+
+    if(has_extra_byte)
+      decode_ext_type_extra_bytes();
+
+    dec->comment(NULL);
+}
+
 void decode_ext_type_polygons(udword_t off, udword_t len) {
   dec->comment("ExtType areas off 0x%08x, len %u", off, len);
   dec->comment(NULL);
+
+  off_t start = rgn->ext_type_polygons.offset + off;
+  off_t oend = start + len;
+  img->seek(start);
+
+  while ( img->tell() < oend ) {
+    decode_ext_type_poly(true);
+  }
+
+  if(img->tell() != oend) {
+    dec->comment("*** OUT OF SYNC %u != %u ***", img->tell(), oend);
+    dec->comment(NULL);
+  }
 }
 
 void decode_ext_type_polylines(udword_t off, udword_t len) {
   dec->comment("ExtType lines off 0x%08x, len %u", off, len);
   dec->comment(NULL);
+
+  off_t start = rgn->ext_type_polylines.offset + off;
+  off_t oend = start + len;
+  img->seek(start);
+
+  while ( img->tell() < oend ) {
+    decode_ext_type_poly(false);
+  }
+
+  if(img->tell() != oend) {
+    dec->comment("*** OUT OF SYNC %u != %u ***", img->tell(), oend);
+    dec->comment(NULL);
+  }
 }
 
 void decode_ext_type_points(udword_t off, udword_t len) {
@@ -367,41 +500,9 @@ void decode_ext_type_points(udword_t off, udword_t len) {
       else
 	dec->comment("%s", ifile->label_get(lab_off).c_str());
     }
-    if(has_extra_byte) {
-      byte_t extra = img->get_byte();
-      dec->print("extra[0] 0x%02x", extra);
+    if(has_extra_byte)
+      decode_ext_type_extra_bytes();
 
-      switch((extra >> 5) & 7) {
-
-      case 0:
-      case 1:
-      case 2:
-	// no further extra data
-	break;
-
-      case 4:
-	dec->print("extra[1] 0x%02x", img->get_byte());
-	break;
-
-      case 5:
-	dec->print("extra[1] 0x%02x", img->get_byte());
-	dec->print("extra[2] 0x%02x", img->get_byte());
-	break;
-
-      case 7:
-	{
-	  byte_t extra1 = img->get_byte();
-	  dec->print("extra[1] 0x%02x", extra1);
-	  int n = extra1 >> 1;
-	  dec->print("extra[2..%d]", n + 1, img->get_string(n).c_str());
-	}
-	break;
-
-      default:
-	dec->comment("*** Unrecognised extra[0] format 0x%02x ***", extra);
-	break;
-      }
-    }
     dec->comment(NULL);
   }
 

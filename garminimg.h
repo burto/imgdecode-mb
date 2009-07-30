@@ -38,7 +38,9 @@ class GarminImg {
 	unsigned long bsize;
 	file_list_t::iterator pfileent;
 	poly_name_t polylines_byname, polygons_byname;
-	point_name_t points_byname, marine_points_byname;
+	point_name_t points_byname;
+	poly_name_t marine_polylines_byname, marine_polygons_byname;
+	point_name_t marine_points_byname;
 
 	// Private utility methods
 
@@ -111,6 +113,8 @@ public:
 	string elem_polyline_name (uword_t type);
 	string elem_polygon_name (uword_t type);
 	string elem_point_name (uword_t type, uword_t subtype);
+	string elem_marine_polyline_name (uword_t type);
+	string elem_marine_polygon_name (uword_t type);
 	string elem_marine_point_name (uword_t type);
 };
 
