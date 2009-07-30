@@ -156,6 +156,11 @@ void decode_rgn_subdiv (uword_t i, int *level)
 		decode_tre_poly(eoffset, false);
 	}
 
+	if(subdiv.ext_type_kinds != 0) {
+	  dec->comment("ExtType Kinds %d", subdiv.ext_type_kinds);
+	  dec->comment(NULL);
+	}
+
 	if (subdiv.ext_type_polygon_len != 0) {
 	  decode_ext_type_polygons(subdiv.ext_type_polygon_off, subdiv.ext_type_polygon_len);
 	}

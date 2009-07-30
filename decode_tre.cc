@@ -562,12 +562,12 @@ static void decode_tre_object_groups()
 	udword_t polygon_off = img->get_udword();
 	udword_t polyline_off = img->get_udword();
 	udword_t point_off = img->get_udword();
-	int objects = img->get_byte();
+	int kinds = img->get_byte();
 	for (n= 1; n< nrecs; ++n) {
 	  udword_t next_polygon_off = img->get_udword();
 	  udword_t next_polyline_off = img->get_udword();
 	  udword_t next_point_off = img->get_udword();
-	  byte_t next_objects = img->get_byte();
+	  byte_t next_kinds = img->get_byte();
 	  udword_t polygon_len = next_polygon_off - polygon_off;
 	  udword_t polyline_len = next_polyline_off - polyline_off;
 	  udword_t point_len = next_point_off - point_off;
@@ -575,7 +575,7 @@ static void decode_tre_object_groups()
 	  dec->print("Polygons  Off 0x%08x, len %u", polygon_off, polygon_len);
 	  dec->print("Polylines Off 0x%08x, len %u", polyline_off, polyline_len);
 	  dec->print("Points    Off 0x%08x, len %u", point_off, point_len);
-	  dec->print("Objects   %u", objects);
+	  dec->print("Kinds     %u", kinds);
 	  map_subdivision_t *subdiv = ifile->subdivision_get(n);
 	  if(subdiv != NULL) {
 	    subdiv->ext_type_polygon_off = polygon_off;
@@ -584,13 +584,13 @@ static void decode_tre_object_groups()
 	    subdiv->ext_type_polyline_len = polyline_len;
 	    subdiv->ext_type_point_off = point_off;
 	    subdiv->ext_type_point_len = point_len;
-	    subdiv->ext_type_objects = objects;
+	    subdiv->ext_type_kinds = kinds;
 	  }
 
 	  polygon_off = next_polygon_off;
 	  polyline_off = next_polyline_off;
 	  point_off = next_point_off;
-	  objects = next_objects;
+	  kinds = next_kinds;
 	}
 }
 

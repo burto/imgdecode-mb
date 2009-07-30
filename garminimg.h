@@ -143,7 +143,7 @@ struct subdivision_struct {
 	udword_t ext_type_polyline_len;
 	udword_t ext_type_point_off;
 	udword_t ext_type_point_len;
-	byte_t ext_type_objects;
+	byte_t ext_type_kinds;
 };
 typedef struct subdivision_struct map_subdivision_t;
 
