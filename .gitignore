@@ -1,2 +1,10 @@
 *.o
 *~
+[0-9]*
+Makefile
+Makefile.bak
+config.h
+config.log
+config.status
+imgdecode
+
