@@ -332,8 +332,9 @@ class ImgTRE : public ImgSubfile {
 public:
 	struct sec_info_struct levels_info, subdiv_info, polyline_info,
 		polygon_info, point_info, copyright_info, object_groups_info,
-		unknown2_info;
+		ext_types_info;
 	int nlevels, nsubdivisions;
+	int num_ext_line_types, num_ext_area_types, num_ext_point_types;
 
 	ImgTRE (class ImgFile *ifilein, off_t offset);
 	~ImgTRE ();
@@ -385,7 +386,7 @@ public:
 #define TRE_POINT	0x0005
 #define TRE_COPYRIGHT	0x0006
 #define TRE_OBJECT_GROUPS 0x0007
-#define TRE_UNKN2	0x0008
+#define TRE_EXT_TYPES	0x0008
 
 #define	LBL_LABELS      0x1001
 #define	LBL_COUNTRY_DEF	0x1002

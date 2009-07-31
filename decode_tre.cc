@@ -17,7 +17,7 @@ static void decode_tre_polygons();
 static void decode_tre_points();
 static void decode_tre_copyrights ();
 static void decode_tre_object_groups ();
-static void decode_tre_unknown2 ();
+static void decode_tre_ext_types ();
 
 void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
 {
@@ -144,21 +144,21 @@ void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
 
 		dec->print("???", img->get_udword());
 
-		dec->print("Unknown2 at offset 0x%08x", 
+		dec->print("Extended Types at offset 0x%08x", 
 			offset= img->get_udword()+soffset);
-		dec->print("Unknown2 length %ld bytes",
+		dec->print("Extended Types length %ld bytes",
 			length= img->get_udword());
-		dec->print("Unknown2 records %u bytes",
+		dec->print("Extended Types records %u bytes",
 			rsize= img->get_uword());
 		if(length != 0)
-		  ifile->offset_add(offset, TRE_UNKN2);
-		tre->unknown2_info.offset= offset;
-		tre->unknown2_info.length= length;
-		tre->unknown2_info.rsize= rsize;
+		  ifile->offset_add(offset, TRE_EXT_TYPES);
+		tre->ext_types_info.offset= offset;
+		tre->ext_types_info.length= length;
+		tre->ext_types_info.rsize= rsize;
 
-		dec->print("Num extended polyline types", img->get_uword());
-		dec->print("Num extended polygon types", img->get_uword());
-		dec->print("Num extended point types", img->get_uword());
+		dec->print("Num extended polyline types %d", tre->num_ext_line_types = img->get_uword());
+		dec->print("Num extended polygon types %d", tre->num_ext_area_types = img->get_uword());
+		dec->print("Num extended point types %d", tre->num_ext_point_types = img->get_uword());
 
 		if ( img->tell() < eoffset)
 		  dec->print("???", img->get_string(eoffset-img->tell()).c_str());
@@ -221,11 +221,11 @@ void decode_tre_body ()
 
 	decode_tre_copyrights();
 
-	// Unknown stuff
+	// extended types
 
 	decode_tre_object_groups();
 
-	decode_tre_unknown2();
+	decode_tre_ext_types();
 }
 
 static void extract_remainder (off_t eoffset)
@@ -594,11 +594,37 @@ static void decode_tre_object_groups()
 	}
 }
 
-static void decode_tre_unknown2 ()
+static void decode_tre_ext_types ()
 {
-	img->seek(tre->unknown2_info.offset);
-	dec->set_outfile("TRE", "unknown2");
-	dec->banner("TRE: Unknown section 2");
+	img->seek(tre->ext_types_info.offset);
+	dec->set_outfile("TRE", "ext_types");
+	dec->banner("TRE: Extended Types");
 
-	dec->print("???", img->get_string(tre->unknown2_info.length).c_str());
+	int n;
+	for(n = 1; n <= tre->num_ext_line_types; ++n) {
+	  uword_t type = img->get_byte();
+	  uword_t levels = img->get_byte();
+	  type = (type << 8) | img->get_byte();
+	  uword_t unkn = img->get_byte();
+	  dec->print("Line Type 0x%04x, max level %d, ? %d", type, levels, unkn);
+	}
+	dec->comment(NULL);
+
+	for(n = 1; n <= tre->num_ext_area_types; ++n) {
+	  uword_t type = img->get_byte();
+	  uword_t levels = img->get_byte();
+	  type = (type << 8) | img->get_byte();
+	  uword_t unkn = img->get_byte();
+	  dec->print("Area Type 0x%04x, max level %d, ? %d", type, levels, unkn);
+	}
+	dec->comment(NULL);
+
+	for(n = 1; n <= tre->num_ext_point_types; ++n) {
+	  uword_t type = img->get_byte();
+	  uword_t levels = img->get_byte();
+	  type = (type << 8) | img->get_byte();
+	  uword_t unkn = img->get_byte();
+	  dec->print("Point Type 0x%04x, max level %d, ? %d", type, levels, unkn);
+	}
+
 }
