@@ -312,7 +312,39 @@ void decode_tre_poly (off_t oend, bool line)
 	}
 }
 
-void decode_ext_type_extra_bytes() {
+const char *decode_marine_foundation_colour(int code) {
+  const char *colours[] = {
+    "none",
+    "red",
+    "green",
+    "yellow",
+    "white",
+    "black",
+    "black-yellow",
+    "white-red",
+    "black-red",
+    "white-green",
+    "red-yellow",
+    "red-green",
+    "orange",
+    "black-yellow-black",
+    "yellow-black",
+    "yellow-black-yellow",
+    "red-white",
+    "green-red-green",
+    "red-green-red",
+    "black-red-black",
+    "yellow-red-yellow",
+    "green-red",
+    "black-white",
+    "white-orange",
+    "orange-white",
+    "green-white"
+  };
+  return (code < 0 || code >= sizeof(colours)/sizeof(colours[0]))? "???" : colours[code];
+}
+
+void decode_ext_type_extra_bytes(udword_t type) {
 
   byte_t extra = img->get_byte();
   dec->print("extra[0] 0x%02x", extra);
@@ -323,6 +355,10 @@ void decode_ext_type_extra_bytes() {
   case 1:
   case 2:
     // no further extra data
+    if((type & 0xff00) == 0x0200) {
+      // marine points
+      dec->comment("Foundation colour %s", decode_marine_foundation_colour((extra >> 1) & 0x1f));
+    }
     break;
     
   case 4:
@@ -414,7 +450,7 @@ void decode_ext_type_poly(bool is_polygon) {
     }
 
     if(has_extra_byte)
-      decode_ext_type_extra_bytes();
+      decode_ext_type_extra_bytes(extType);
 
     dec->comment(NULL);
 }
@@ -501,7 +537,7 @@ void decode_ext_type_points(udword_t off, udword_t len) {
 	dec->comment("%s", ifile->label_get(lab_off).c_str());
     }
     if(has_extra_byte)
-      decode_ext_type_extra_bytes();
+      decode_ext_type_extra_bytes(extType);
 
     dec->comment(NULL);
   }
