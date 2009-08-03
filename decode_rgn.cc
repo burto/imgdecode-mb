@@ -347,6 +347,7 @@ const char *decode_marine_foundation_colour(int code) {
 void decode_ext_type_extra_bytes(udword_t type) {
 
   byte_t extra = img->get_byte();
+  byte_t extra1,extra2;
   dec->print("extra[0] 0x%02x", extra);
 
   switch((extra >> 5) & 7) {
@@ -362,12 +363,26 @@ void decode_ext_type_extra_bytes(udword_t type) {
     break;
     
   case 4:
-    dec->print("extra[1] 0x%02x", img->get_byte());
+    dec->print("extra[1] 0x%02x", extra1 = img->get_byte());
+    if((type & 0xff00) == 0x0400) {
+      // marine obstruction
+      if(extra & 8)
+	dec->comment("Depth %0.1f", extra1 / 10.0);
+      else
+	dec->comment("Depth %d", extra1);
+    }
     break;
 
   case 5:
-    dec->print("extra[1] 0x%02x", img->get_byte());
-    dec->print("extra[2] 0x%02x", img->get_byte());
+    dec->print("extra[1] 0x%02x", extra1 = img->get_byte());
+    dec->print("extra[2] 0x%02x", extra2 = img->get_byte());
+    if((type & 0xff00) == 0x0400) {
+      // marine obstruction
+      if(extra & 8)
+	dec->comment("Depth %0.1f", ((extra2 << 8) + extra1) / 10.0);
+      else
+	dec->comment("Depth %d", (extra2 << 8) + extra1);
+    }
     break;
 
   case 7:
