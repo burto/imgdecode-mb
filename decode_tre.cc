@@ -422,6 +422,7 @@ static void _decode_subdiv (map_subdivision_t *subdiv, byte_t shiftby)
 	udword_t rgninfo;
 	string selems;
 
+	memset(subdiv, 0, sizeof(*subdiv));
 	subdiv->shiftby= shiftby;
 	subdiv->rgn_end= 0xFFFFFFFF;
 
