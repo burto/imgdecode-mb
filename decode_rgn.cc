@@ -428,6 +428,7 @@ void decode_ext_type_poly(bool is_polygon) {
     uword_t bstream_len = img->get_byte();
     if ( (bstream_len & 1) == 0 ) {
       // two byte length
+      dec->print("");
       bstream_len |= img->get_byte() << 8;
       bstream_len = (bstream_len >> 2) - 1;
     } else {
