@@ -221,11 +221,13 @@ void decode_tre_body ()
 
 	decode_tre_copyrights();
 
-	// extended types
-
-	decode_tre_object_groups();
-
-	decode_tre_ext_types();
+	if(tre->num_ext_point_types > 0 ||
+	   tre->num_ext_area_types > 0 ||
+	   tre->num_ext_line_types > 0) {
+	  // extended types
+	  decode_tre_object_groups();
+	  decode_tre_ext_types();
+	}
 }
 
 static void extract_remainder (off_t eoffset)
