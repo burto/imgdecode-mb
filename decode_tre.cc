@@ -142,7 +142,7 @@ void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
 		tre->object_groups_info.length= length;
 		tre->object_groups_info.rsize= rsize;
 
-		dec->print("???", img->get_udword());
+		dec->print("Extended Header Format 0x%08x", tre->extended_header_format = img->get_udword());
 
 		dec->print("Extended Types at offset 0x%08x", 
 			offset= img->get_udword()+soffset);
@@ -221,9 +221,7 @@ void decode_tre_body ()
 
 	decode_tre_copyrights();
 
-	if(tre->num_ext_point_types > 0 ||
-	   tre->num_ext_area_types > 0 ||
-	   tre->num_ext_line_types > 0) {
+	if((tre->extended_header_format & 0x0000ff00) == 0x00000600) {
 	  // extended types
 	  decode_tre_object_groups();
 	  decode_tre_ext_types();

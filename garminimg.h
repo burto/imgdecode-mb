@@ -335,6 +335,7 @@ public:
 		ext_types_info;
 	int nlevels, nsubdivisions;
 	int num_ext_line_types, num_ext_area_types, num_ext_point_types;
+	int extended_header_format;
 
 	ImgTRE (class ImgFile *ifilein, off_t offset);
 	~ImgTRE ();
