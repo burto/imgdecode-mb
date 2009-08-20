@@ -345,7 +345,7 @@ const char *decode_marine_foundation_colour(int code) {
 }
 
 void decode_ext_type_extra_bytes(udword_t type) {
-
+  char *positions[] = { "unknown", "(empty)", "doubtful", "existence doubtful", "approximate", "reported", "BAD VALUE 6", "BAD VALUE 7" };
   byte_t extra = img->get_byte();
   byte_t extra1,extra2;
   dec->print("extra[0] 0x%02x", extra);
@@ -366,10 +366,12 @@ void decode_ext_type_extra_bytes(udword_t type) {
     dec->print("extra[1] 0x%02x", extra1 = img->get_byte());
     if((type & 0xff00) == 0x0400) {
       // marine obstruction
+      dec->comment("Position %s", positions[extra & 0x07]);
+      const char *units = (extra & 0x10)? "m" : "ft";
       if(extra & 8)
-	dec->comment("Depth %0.1f", extra1 / 10.0);
+	dec->comment("Depth %0.1f%s", extra1 / 10.0, units);
       else
-	dec->comment("Depth %d", extra1);
+	dec->comment("Depth %d%s", extra1, units);
     }
     break;
 
@@ -378,10 +380,12 @@ void decode_ext_type_extra_bytes(udword_t type) {
     dec->print("extra[2] 0x%02x", extra2 = img->get_byte());
     if((type & 0xff00) == 0x0400) {
       // marine obstruction
+      dec->comment("Position %s", positions[extra & 0x07]);
+      const char *units = (extra & 0x10)? "m" : "ft";
       if(extra & 8)
-	dec->comment("Depth %0.1f", ((extra2 << 8) + extra1) / 10.0);
+	dec->comment("Depth %0.1f%s", ((extra2 << 8) + extra1) / 10.0, units);
       else
-	dec->comment("Depth %d", (extra2 << 8) + extra1);
+	dec->comment("Depth %d%s", (extra2 << 8) + extra1, units);
     }
     break;
 
