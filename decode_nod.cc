@@ -116,11 +116,31 @@ void decode_nod_unknown3 ()
 	dec->set_outfile("NOD", "unknown3");
 	dec->banner("NOD: Unknown section 3");
 
+	double minLon = 360;
+	double maxLon = 0;
+	double minLat = 180;
+	double maxLat = -180;
 	for (n= 1; n<= nrecs; ++n) {
 		dec->comment("Record %u", n);
-		dec->print("???",
-			img->get_string(nod->unknown3_info.rsize).c_str());
+		if(nod->unknown3_info.rsize == 9) {
+		  int ilon =  img->get_uint24();
+		  double lon = 360.0 * ilon / 0x01000000;
+		  if(lon > maxLon) maxLon = lon;
+		  if(lon < minLon) minLon = lon;
+		  dec->print("Lon 0x%06x %f", ilon, lon);
+		  int ilat =  img->get_uint24();
+		  double lat = -180 + 360.0 * ilat / 0x01000000;
+		  if(lat > maxLat) maxLat = lat;
+		  if(lat < minLat) minLat = lat;
+		  dec->print("Lat 0x%06x %f", ilat, lat);
+		  dec->print("Point 0x%06x", img->get_uint24());
+		}
+		else
+		  dec->print("???", img->get_string(nod->unknown3_info.rsize).c_str());
 		dec->comment(NULL);
 	}
+
+	dec->comment("Lon min %f, max %f", minLon, maxLon);
+	dec->comment("Lat min %f, max %f", minLat, maxLat);
 }
 
