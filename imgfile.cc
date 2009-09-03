@@ -257,11 +257,6 @@ string ImgFile::zip_get (uword_t idx)
 	return zpos->second;
 }
 
-uword_t ImgFile::nzips()
-{
-	return zips.size();
-}
-
 //----------------------------------------------------------------------
 // Map level methods
 //----------------------------------------------------------------------

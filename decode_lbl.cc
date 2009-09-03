@@ -167,6 +167,8 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 	lbl->zip_info.length= length;
 	lbl->zip_info.offset= offset;
 	lbl->zip_info.rsize= rsize;
+	if(rsize != 0)
+	  lbl->nzips = length / rsize;
 
 	dec->print("", img->get_udword());
 
@@ -644,7 +646,7 @@ void decode_lbl_poiprop ()
 		if ( has_zip ) {
 			udword_t zidx;
 
-			if ( ifile->nzips() > 0xFF ) zidx= img->get_uword();
+			if ( lbl->nzips > 0xFF ) zidx= img->get_uword();
 			else zidx= img->get_byte();
 
 			dec->print("Zip idx %lu", zidx);
@@ -655,6 +657,11 @@ void decode_lbl_poiprop ()
 			string phn= img->get_base11str('-');
 			if ( phn.size() )
 				dec->print("Ph num %s", phn.c_str());
+			else {
+			  lbloffset = img->get_uint24();
+			  lbloffset = ((lbloffset & 0xff) << 16) | ((lbloffset >> 8) & 0xffff);
+			  dec->print("Ph num %s", ifile->label_get(lbloffset).c_str());
+			}
 		}
 
 		if ( has_exit ) {

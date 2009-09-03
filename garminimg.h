@@ -221,7 +221,6 @@ public:
 
 	void zip_add (uword_t idx, string name);
 	string zip_get (uword_t idx);
-	uword_t nzips ();
 
 	// Level methods
 
