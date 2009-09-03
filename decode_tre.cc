@@ -606,6 +606,7 @@ static void decode_tre_ext_types ()
 	return;
 #endif
 
+	dec->comment("%d line types", tre->num_ext_line_types);
 	int n;
 	for(n = 1; n <= tre->num_ext_line_types; ++n) {
 	  uword_t type = img->get_byte();
@@ -614,8 +615,8 @@ static void decode_tre_ext_types ()
 	  uword_t unkn = img->get_byte();
 	  dec->print("Line Type 0x%04x, max level %d, ? %d", type, levels, unkn);
 	}
-	dec->comment(NULL);
 
+	dec->comment("%d area types", tre->num_ext_area_types);
 	for(n = 1; n <= tre->num_ext_area_types; ++n) {
 	  uword_t type = img->get_byte();
 	  uword_t levels = img->get_byte();
@@ -623,8 +624,8 @@ static void decode_tre_ext_types ()
 	  uword_t unkn = img->get_byte();
 	  dec->print("Area Type 0x%04x, max level %d, ? %d", type, levels, unkn);
 	}
-	dec->comment(NULL);
 
+	dec->comment("%d point types", tre->num_ext_point_types);
 	for(n = 1; n <= tre->num_ext_point_types; ++n) {
 	  uword_t type = img->get_byte();
 	  uword_t levels = img->get_byte();
