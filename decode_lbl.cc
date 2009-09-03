@@ -7,7 +7,7 @@ void decode_lbl_labels (off_t end);
 void decode_lbl_country_def ();
 void decode_lbl_region_def ();
 void decode_lbl_city_def ();
-void decode_lbl_zip ();
+void decode_lbl_zip (bool save_label);
 void decode_lbl_poi_index ();
 void decode_lbl_poi_type_index ();
 void decode_lbl_poiprop ();
@@ -285,6 +285,20 @@ void decode_lbl_body ()
 			img->tell()).c_str());
 	}
 
+	if(lbl->zip_info.length > 0) {
+	  // retrieve zip strings first so they can be reported in POI props
+	  off_t save_pos = img->tell();
+	  while( img->tell() < eoffset) {
+	    type = ifile->offset_find(img->tell());
+	    if(type == LBL_ZIP_DEF) {
+	      decode_lbl_zip(true);
+	      break;
+	    }
+	    img->seek(ifile->offset_next(img->tell()));
+	  }
+	  img->seek(save_pos);
+	}
+
 	while ( img->tell() < eoffset ) {
 		type= ifile->offset_find(img->tell());
 
@@ -334,7 +348,7 @@ void decode_lbl_body ()
 		case LBL_ZIP_DEF:
 			dec->set_outfile("LBL", "zipcodes");
 			dec->banner("LBL: Zip/Postal codes");
-			decode_lbl_zip();
+			decode_lbl_zip(false);
 			break;
 		case LBL_HWY_DEF:
 			dec->set_outfile("LBL", "highways");
@@ -493,18 +507,22 @@ void decode_lbl_city_def ()
 	}
 }
 
-void decode_lbl_zip ()
+void decode_lbl_zip (bool save_label)
 {
 	int nrecs= lbl->zip_info.length / lbl->zip_info.rsize;
 	int n;
 
 	for (n= 1; n<= nrecs; ++n) {
 		udword_t offset= img->get_uint24();
-		string label;
+		string label = ifile->label_get(offset);
 		
-		dec->print("Zip %u label at 0x%06x", n, offset);
-		dec->comment("%s", ifile->label_get(offset).c_str());
-		ifile->zip_add(n, label);
+		if(save_label) {
+		  ifile->zip_add(n, label);
+		}
+		else {
+		  dec->print("Zip %u label at 0x%06x", n, offset);
+		  dec->comment("%s", label.c_str());
+		}
 	}
 }
 

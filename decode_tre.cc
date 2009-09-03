@@ -601,6 +601,11 @@ static void decode_tre_ext_types ()
 	dec->set_outfile("TRE", "ext_types");
 	dec->banner("TRE: Extended Types");
 
+#if 0
+	dec->print("???", img->get_string(tre->ext_types_info.length).c_str());
+	return;
+#endif
+
 	int n;
 	for(n = 1; n <= tre->num_ext_line_types; ++n) {
 	  uword_t type = img->get_byte();
