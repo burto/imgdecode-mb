@@ -35,13 +35,13 @@ int main (int argc, char *argv[])
 		if(tre != NULL)
 			decode_tre_header(&dec, tre);
 		else
-			fprintf(stderr, "TRE not found\n");
+			fprintf(stderr, "TRE not found in %s\n", ifile->name.c_str());
 
 		lbl= (ImgLBL *) ifile->subfile_find("LBL");
 		if(lbl != NULL)
 			decode_lbl_header(&dec, lbl);
 		else {
-			fprintf(stderr, "LBL not found\n");
+			fprintf(stderr, "LBL not found in %s\n", ifile->name.c_str());
 			continue;
 		}
 
@@ -58,7 +58,7 @@ int main (int argc, char *argv[])
 
 		rgn= (ImgRGN *) ifile->subfile_find("RGN");
 		if ( rgn == NULL ) {
-			fprintf(stderr, "RGN not found\n");
+			fprintf(stderr, "RGN not found in %s\n", ifile->name.c_str());
 			continue;	
 		}
 
