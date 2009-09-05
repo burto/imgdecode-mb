@@ -347,7 +347,7 @@ const char *decode_marine_foundation_colour(int code) {
 }
 
 void decode_ext_type_extra_bytes(udword_t type) {
-  char *positions[] = { "unknown", "(empty)", "doubtful", "existence doubtful", "approximate", "reported", "BAD VALUE 6", "BAD VALUE 7" };
+  const char *positions[] = { "unknown", "(empty)", "doubtful", "existence doubtful", "approximate", "reported", "BAD VALUE 6", "BAD VALUE 7" };
   byte_t extra = img->get_byte();
   byte_t extra1,extra2;
   dec->print("extra[0] 0x%02x", extra);
