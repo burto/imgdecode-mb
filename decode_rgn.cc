@@ -466,17 +466,8 @@ void decode_ext_type_poly(bool is_polygon, char *type_label) {
 
     if(has_label) {
       int lab_off = img->get_uint24();
-      bool is_poi = (lab_off & 0x400000) != 0;
-      lab_off &= 0x3ffff;
-      if ( is_poi ) {
-	dec->print("POI offset 0x%06x in LBL", lab_off);
-      } else  {
-	dec->print("Label offset 0x%06x in LBL", lab_off);
-      }
-      if ( is_poi )
-	dec->comment("%s", ifile->poi_get_name(lab_off).c_str());
-      else
-	dec->comment("%s", ifile->label_get(lab_off).c_str());
+      dec->print("Label offset 0x%06x in LBL", lab_off);
+      dec->comment("%s", ifile->label_get(lab_off).c_str());
     }
 
     if(has_extra_byte)
@@ -555,7 +546,7 @@ void decode_ext_type_points(udword_t off, udword_t len) {
     if(has_label) {
       int lab_off = img->get_uint24();
       bool is_poi = (lab_off & 0x400000) != 0;
-      lab_off &= 0x3ffff;
+      lab_off &= 0x3fffff;
       if ( is_poi ) {
 	dec->print("POI offset 0x%06x in LBL", lab_off);
       } else  {
