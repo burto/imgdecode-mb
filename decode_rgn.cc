@@ -101,6 +101,7 @@ void decode_rgn_subdiv (uword_t i, int *level)
 	banner+= snum;
 
 	dec->banner(banner);
+	dec->comment("length = %ld", eoffset - soffset);
 
 	opnt= oidx= opline= opgon= 0;
 	nptrs= SUB_N_HAS(subdiv.elements)-1;
