@@ -561,12 +561,14 @@ void decode_lbl_poiprop ()
 	off_t eos= img->tell() + lbl->poiprop_info.length;
 	udword_t poi_data, lbloffset;
 	bool override;
+	int num_pois = 0;
 
 	while ( img->tell() < eos ) {
 		byte_t flags;
 		bool has_street, has_street_num, has_city,
 		  has_zip, has_phone, has_exit, has_tide_prediction, has_11_base_number;
 
+		++num_pois;
 		poi_data= img->get_uint24();
 		lbloffset= (poi_data & 0x3FFFFF);
 		override= (poi_data & 0x800000);
@@ -709,6 +711,8 @@ void decode_lbl_poiprop ()
 
 		dec->comment(NULL);
 	}
+
+	dec->comment("%d pois", num_pois);
 
 	if ( img->tell() > eos ) {
 		fprintf(stderr, "POI prop overrun! eos = 0x%x, curPos = 0x%x\n",
