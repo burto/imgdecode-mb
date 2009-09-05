@@ -106,11 +106,12 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 		length= img->get_udword());
 	dec->print("Zip bit is phone if no phone bit: %c", (lbl->zipisphone= img->get_byte()) ?
 		'Y' : 'N');
-	lbl->poiflags= img->get_byte();
+	lbl->poiflags= img->get_uword();
 	if ( lbl->poiflags ) {
 		string s_flags;
 		bool has_street, has_street_num, has_city,
-		  has_zip, has_phone, has_exit, has_tide_prediction, has_11_base_number;
+		  has_zip, has_phone, has_exit, has_tide_prediction,
+		  has_11_base_number, has_unkn1;
 
 		has_street_num=	lbl->poiflags & 0x1;
 		has_street=	lbl->poiflags & 0x2;
@@ -120,6 +121,7 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 		has_exit=	lbl->poiflags & 0x20;
 		has_tide_prediction=  lbl->poiflags & 0x40;
 		has_11_base_number= lbl->poiflags & 0x80;
+		has_unkn1 = lbl->poiflags & 0x100;
 
 		if ( lbl->zipisphone && has_zip && ! has_phone ) {
 			has_zip= 0;
@@ -134,6 +136,7 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 		if ( has_exit ) s_flags+= "exit,";
 		if ( has_tide_prediction ) s_flags+= "tide prediction,";
 		if ( has_11_base_number ) s_flags+= "11-base number,";
+		if ( has_unkn1 ) s_flags+= "unkn1,";
 
 		s_flags.erase(s_flags.size()-1);
 		dec->print("%s POIs: %s", img->base(lbl->poiflags,
@@ -144,7 +147,6 @@ void decode_lbl_header (class Decoder *dec_in, class ImgLBL *lbl_in)
 	lbl->poiprop_info.offset= offset;
 
 	dec->print("", img->get_uword());
-	dec->print("", img->get_byte());
 
 	offset= img->get_udword()+soffset;
 	dec->print("POI Type Index section at 0x%06lx", offset);
@@ -564,9 +566,10 @@ void decode_lbl_poiprop ()
 	int num_pois = 0;
 
 	while ( img->tell() < eos ) {
-		byte_t flags;
+	        int flags;
 		bool has_street, has_street_num, has_city,
-		  has_zip, has_phone, has_exit, has_tide_prediction, has_11_base_number;
+		  has_zip, has_phone, has_exit, has_tide_prediction,
+		  has_11_base_number, has_unkn1;
 
 		++num_pois;
 		poi_data= img->get_uint24();
@@ -575,23 +578,24 @@ void decode_lbl_poiprop ()
 
 		dec->print("Label offset 0x%06x", lbloffset);
 		dec->comment("%s", ifile->label_get(lbloffset).c_str());
+		flags= lbl->poiflags;
 		if ( override ) {
 			byte_t oflags= img->get_byte();
-			flags = 0;
-			int bit = 1;
-			for(int i = 0; i < 8; ++i) {
-			  while(!(lbl->poiflags & bit) && (bit < 256))
-			    bit <<= 1;
-			  if(oflags & (1 << i))
-			    flags |= bit;
-			  bit <<= 1;
+			int gbit = 1;
+			int obit = 1;
+			for(int i = 0; i < 9; ++i) {
+			  if((lbl->poiflags & gbit) != 0) {
+			    if((oflags & obit) == 0)
+			      flags ^= gbit;
+			    obit <<= 1;
+			  }
+			  gbit <<= 1;
 			}
 
 			dec->print("%s override flags -> %s",
 				   img->base(oflags, 2, 8).c_str(),
 				   img->base(flags, 2, 8).c_str());
-
-		} else flags= lbl->poiflags;
+		}
 
 		has_street_num=	flags & 0x1;
 		has_street=	flags & 0x2;
@@ -601,6 +605,7 @@ void decode_lbl_poiprop ()
 		has_exit=	flags & 0x20;
 		has_tide_prediction=flags & 0x40;
 		has_11_base_number=flags & 0x80;
+		has_unkn1 =     flags & 0x100;
 
 /*
 		if ( lbl->zipisphone && has_zip && ! has_phone ) {
@@ -620,6 +625,7 @@ void decode_lbl_poiprop ()
 			if ( has_exit ) s_flags+= "exit,";
 			if ( has_tide_prediction ) s_flags+= "tide prediction,";
 			if ( has_11_base_number ) s_flags+= "11-base number,";
+			if ( has_unkn1 ) s_flags+= "unkn1,";
 
 			if ( s_flags.size() )
 				s_flags.erase(s_flags.size()-1);
@@ -701,6 +707,13 @@ void decode_lbl_poiprop ()
 			  else n= img->get_byte();
 			  dec->print("Exit facility idx 1 %lu", n);
 			}
+		}
+
+		if(has_unkn1) {
+			int u1 = img->get_byte();
+			int n = u1 >> 1;
+			dec->print("Unknown 0x%02x (len = %d)", u1, n);
+			dec->print("???", img->get_string(n).c_str());
 		}
 
 		while ( (img->tell()-soffset) % lbl->omult &&
