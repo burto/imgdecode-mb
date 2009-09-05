@@ -11,10 +11,10 @@ static class Decoder *dec;
 
 void decode_rgn_subdiv (uword_t i, int *level);
 void decode_tre_points (off_t oend, bool indexed);
-void decode_tre_poly (off_t oend, bool line);
+void decode_tre_poly (off_t oend, bool line, char *type_label);
 
-void decode_ext_type_polygons(udword_t off, udword_t len);
-void decode_ext_type_polylines(udword_t off, udword_t len);
+void decode_ext_type_polygons(udword_t off, udword_t len, char *type_label);
+void decode_ext_type_polylines(udword_t off, udword_t len, char *type_label);
 void decode_ext_type_points(udword_t off, udword_t len);
 
 void decode_rgn_header (class Decoder *dec_in, class ImgRGN *rgn_in)
@@ -147,14 +147,17 @@ void decode_rgn_subdiv (uword_t i, int *level)
 		decode_tre_points(oend, true);
 	}
 
+	char type_label[80];
 	if ( SUB_HAS_POLYLINE(subdiv.elements) ) {
 		oend= opgon ? opgon : eoffset;
 
-		decode_tre_poly(oend, true);
+		sprintf(type_label, "line level %02d sub %04d", *level, i);
+		decode_tre_poly(oend, true, type_label);
 	}
 
 	if ( SUB_HAS_POLYGON(subdiv.elements) ) {
-		decode_tre_poly(eoffset, false);
+	  sprintf(type_label, "area level %02d sub %04d", *level, i);
+	  decode_tre_poly(eoffset, false, type_label);
 	}
 
 	if(subdiv.ext_type_kinds != 0) {
@@ -163,10 +166,12 @@ void decode_rgn_subdiv (uword_t i, int *level)
 	}
 
 	if (subdiv.ext_type_polygon_len != 0) {
-	  decode_ext_type_polygons(subdiv.ext_type_polygon_off, subdiv.ext_type_polygon_len);
+	  sprintf(type_label, "area level %02d sub %04d", *level, i);
+	  decode_ext_type_polygons(subdiv.ext_type_polygon_off, subdiv.ext_type_polygon_len, type_label);
 	}
 	if (subdiv.ext_type_polyline_len != 0) {
-	  decode_ext_type_polylines(subdiv.ext_type_polyline_off, subdiv.ext_type_polyline_len);
+	  sprintf(type_label, "line level %02d sub %04d", *level, i);
+	  decode_ext_type_polylines(subdiv.ext_type_polyline_off, subdiv.ext_type_polyline_len, type_label);
 	}
 	if (subdiv.ext_type_point_len != 0) {
 	  decode_ext_type_points(subdiv.ext_type_point_off, subdiv.ext_type_point_len);
@@ -230,7 +235,7 @@ void decode_tre_points (off_t oend, bool indexed)
 	}
 }
 
-void decode_tre_poly (off_t oend, bool line)
+void decode_tre_poly (off_t oend, bool line, char *type_label)
 {
 	int n= 1;
 
@@ -250,6 +255,8 @@ void decode_tre_poly (off_t oend, bool line)
 
 		if ( line ) dec->comment("Line %u", n++);
 		type= img->get_byte();
+
+		//		fprintf(stdout, "%s 0x00%02x00\n", type_label, type);
 		two_byte_len= (type & 0x80);
 		if ( line ) {
 			direction= (type & 0x40);
@@ -406,13 +413,14 @@ void decode_ext_type_extra_bytes(udword_t type) {
   }
 }
 
-void decode_ext_type_poly(bool is_polygon) {
+void decode_ext_type_poly(bool is_polygon, char *type_label) {
     byte_t type, subtype;
     word_t dx, dy;
 
     type = img->get_byte();
     dec->print("Type 0x%02x", type);
     subtype = img->get_byte();
+    //    fprintf(stdout, "%s 0x01%02x%02x\n", type_label, type, subtype);
     bool has_label = (subtype & 0x20) != 0;
     bool unk1 = (subtype & 0x40) != 0;
     bool has_extra_byte = (subtype & 0x80) != 0;
@@ -477,7 +485,7 @@ void decode_ext_type_poly(bool is_polygon) {
     dec->comment(NULL);
 }
 
-void decode_ext_type_polygons(udword_t off, udword_t len) {
+void decode_ext_type_polygons(udword_t off, udword_t len, char *type_label) {
   dec->comment("ExtType areas off 0x%08x, len %u", off, len);
   dec->comment(NULL);
 
@@ -486,7 +494,7 @@ void decode_ext_type_polygons(udword_t off, udword_t len) {
   img->seek(start);
 
   while ( img->tell() < oend ) {
-    decode_ext_type_poly(true);
+    decode_ext_type_poly(true, type_label);
   }
 
   if(img->tell() != oend) {
@@ -495,7 +503,7 @@ void decode_ext_type_polygons(udword_t off, udword_t len) {
   }
 }
 
-void decode_ext_type_polylines(udword_t off, udword_t len) {
+void decode_ext_type_polylines(udword_t off, udword_t len, char *type_label) {
   dec->comment("ExtType lines off 0x%08x, len %u", off, len);
   dec->comment(NULL);
 
@@ -504,7 +512,7 @@ void decode_ext_type_polylines(udword_t off, udword_t len) {
   img->seek(start);
 
   while ( img->tell() < oend ) {
-    decode_ext_type_poly(false);
+    decode_ext_type_poly(false, type_label);
   }
 
   if(img->tell() != oend) {
