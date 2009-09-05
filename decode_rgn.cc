@@ -191,12 +191,13 @@ void decode_tre_points (off_t oend, bool indexed)
 
 		if ( indexed ) dec->comment("Point #%u", idx++);
 		type= img->get_byte();
-		if ( has_subtype ) dec->print("Primary type %u", type);
 
 		point_info= img->get_uint24();
 		has_subtype= (point_info & 0x800000);
 		is_poi=      (point_info & 0x400000);
 		lbloffset=   (point_info & 0x1FFFFF);
+
+		dec->print("Primary type 0x%02x", type);
 
 		if ( is_poi ) {
 			dec->print("POI offset 0x%06x in LBL", lbloffset);
@@ -218,7 +219,7 @@ void decode_tre_points (off_t oend, bool indexed)
 
 		if ( has_subtype ) {
 			subtype= img->get_byte();
-			dec->print("Subtype %u", subtype);
+			dec->print("Subtype 0x%02x", subtype);
 		} else subtype= 0;
 
 		dec->comment("%s", img->elem_point_name(type, subtype).c_str());
