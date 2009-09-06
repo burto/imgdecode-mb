@@ -17,6 +17,10 @@ void decode_ext_type_polygons(udword_t off, udword_t len, char *type_label);
 void decode_ext_type_polylines(udword_t off, udword_t len, char *type_label);
 void decode_ext_type_points(udword_t off, udword_t len);
 
+int pointCount[8], lineCount[8], shapeCount[8];
+int pointBytes[8], lineBytes[8], shapeBytes[8];
+int thisLevel;
+
 void decode_rgn_header (class Decoder *dec_in, class ImgRGN *rgn_in)
 {
 	off_t soffset;
@@ -68,6 +72,31 @@ void decode_rgn_body ()
 
 	level= -1;
 	for (i= 1; i<= n; ++i) decode_rgn_subdiv(i, &level);
+
+#if 0
+	int totalPoints = 0, totalLines = 0, totalShapes = 0;
+	int totalPointBytes = 0, totalLineBytes = 0, totalShapeBytes = 0;
+
+	for(i = 0; i < 8; ++i) {
+	  fprintf(stderr,
+		  "Level[%d] points%6d/%7d lines%6d/%7d shapes%6d/%7d\n",
+		  i,
+		  pointCount[i], pointBytes[i],
+		  lineCount[i], lineBytes[i],
+		  shapeCount[i], shapeBytes[i]);
+	  totalPoints += pointCount[i];
+	  totalPointBytes += pointBytes[i];
+	  totalLines += lineCount[i];
+	  totalLineBytes += lineBytes[i];
+	  totalShapes += shapeCount[i];
+	  totalShapeBytes += shapeBytes[i];
+	}
+	fprintf(stderr,
+		"Total    points%6d/%7d lines%6d/%7d shapes%6d/%7d\n",
+		totalPoints, totalPointBytes,
+		totalLines, totalLineBytes,
+		totalShapes, totalShapeBytes);
+#endif
 }
 
 void decode_rgn_subdiv (uword_t i, int *level)
@@ -99,6 +128,8 @@ void decode_rgn_subdiv (uword_t i, int *level)
 	sprintf(snum, "%u", i);
 	banner= "RGN: Subdivision ";
 	banner+= snum;
+
+	thisLevel = *level;
 
 	dec->banner(banner);
 	dec->comment("length = %ld", eoffset - soffset);
@@ -187,12 +218,16 @@ void decode_tre_points (off_t oend, bool indexed)
 	else dec->comment("Points to 0x%08x", oend);
 	dec->comment(NULL);
 
+	pointBytes[thisLevel] += oend - img->tell();
+
 	while ( img->tell() < oend ) {
 		byte_t type, subtype;
 		bool has_subtype = 0, is_poi;
 		udword_t point_info, lbloffset;
 		word_t dx, dy;
 		string sinfo;
+
+		++pointCount[thisLevel];
 
 		if ( indexed ) dec->comment("Point #%u", idx++);
 		type= img->get_byte();
@@ -244,6 +279,11 @@ void decode_tre_poly (off_t oend, bool line, char *type_label)
 	else dec->comment("Polygons to 0x%08x", oend);
 	dec->comment(NULL);
 
+	if(line)
+	  lineBytes[thisLevel] += oend - img->tell();
+	else
+	  shapeBytes[thisLevel] += oend - img->tell();
+
 	while ( img->tell() < oend ) {
 		byte_t type, bstream_info;
 		word_t dx, dy;
@@ -252,6 +292,11 @@ void decode_tre_poly (off_t oend, bool line, char *type_label)
 		bool extra_bit, two_byte_len, direction, lbl_in_net;
 		udword_t lbloffset, lbl_info;
 		string bitstream;
+
+		if(line)
+		  ++lineCount[thisLevel];
+		else
+		  ++shapeCount[thisLevel];
 
 		if ( line ) dec->comment("Line %u", n++);
 		type= img->get_byte();
@@ -484,7 +529,10 @@ void decode_ext_type_polygons(udword_t off, udword_t len, char *type_label) {
   off_t oend = start + len;
   img->seek(start);
 
+  shapeBytes[thisLevel] += len;
+
   while ( img->tell() < oend ) {
+    ++shapeCount[thisLevel];
     decode_ext_type_poly(true, type_label);
   }
 
@@ -498,11 +546,14 @@ void decode_ext_type_polylines(udword_t off, udword_t len, char *type_label) {
   dec->comment("ExtType lines off 0x%08x, len %u", off, len);
   dec->comment(NULL);
 
+  lineBytes[thisLevel] += len;
+
   off_t start = rgn->ext_type_polylines.offset + off;
   off_t oend = start + len;
   img->seek(start);
 
   while ( img->tell() < oend ) {
+    ++lineCount[thisLevel];
     decode_ext_type_poly(false, type_label);
   }
 
@@ -521,9 +572,13 @@ void decode_ext_type_points(udword_t off, udword_t len) {
   off_t oend = start + len;
   img->seek(start);
 
+  pointBytes[thisLevel] += len;
+
   while ( img->tell() < oend ) {
     byte_t type, subtype;
     word_t dx, dy;
+
+    ++pointCount[thisLevel];
 
     type = img->get_byte();
     dec->print("Type 0x%02x", type);
