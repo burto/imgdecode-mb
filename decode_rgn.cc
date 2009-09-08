@@ -306,12 +306,13 @@ void decode_tre_poly (off_t oend, bool line, char *type_label)
 		if ( line ) {
 			direction= (type & 0x40);
 			type&= 0x3F;
-			dec->print("Type %u, %s", type,
+			dec->print("Type 0x%02x, %s", type,
 				img->elem_polyline_name(type).c_str());
 			if ( direction ) dec->comment("One-way road");
 			if ( two_byte_len ) dec->comment("2 byte length");
 		} else {
-			dec->print("Type %u, %s", type,
+			type&= 0x7F;
+			dec->print("Type 0x%02x, %s", type,
 				img->elem_polygon_name(type).c_str());
 		}
 

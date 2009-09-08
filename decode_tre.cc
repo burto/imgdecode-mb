@@ -485,7 +485,7 @@ static void decode_tre_polylines()
 
 		dec->comment(NULL);
 		type= img->get_byte();
-		dec->print("Type %u, %s", type,
+		dec->print("Type 0x%02x, %s", type,
 			img->elem_polyline_name(type).c_str());
 		dec->print("max level %u?", img->get_byte());
 	}
@@ -507,7 +507,7 @@ static void decode_tre_polygons()
 
 		dec->comment(NULL);
 		type= img->get_byte();
-		dec->print("Type %u, %s", type,
+		dec->print("Type 0x%02x, %s", type,
 			img->elem_polygon_name(type).c_str());
 		dec->print("max level %u?", img->get_byte());
 	}
@@ -528,7 +528,7 @@ static void decode_tre_points()
 		byte_t type, subtype;
 
 		dec->comment(NULL);
-		dec->print("Type %u", type= img->get_byte());
+		dec->print("Type 0x%02x", type= img->get_byte());
 		dec->print("max level %u?", img->get_byte());
 		subtype= img->get_byte();
 		dec->print("Subtype %u, %s", subtype,

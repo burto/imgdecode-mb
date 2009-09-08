@@ -514,7 +514,13 @@ string GarminImg::elem_point_name (uword_t type, uword_t subtype)
 	uword_t fulltype= (type<<8)|subtype;
 
 	ppos= points_byname.find(fulltype);
-	return ( ppos == points_byname.end() ) ? "unknown" : ppos->second;
+	if(ppos == points_byname.end() ) {
+	  char buf[64];
+	  sprintf(buf, "unknown type 0x%04x", fulltype);
+	  return buf;
+	}
+
+	return ppos->second;
 }
 
 string GarminImg::elem_marine_polyline_name (uword_t type)
