@@ -350,7 +350,7 @@ void decode_tre_poly (off_t oend, bool line, char *type_label)
 		} else {
 			bstream_len= img->get_byte();
 		}
-		dec->print("Bitsteam %u bytes", bstream_len);
+		dec->print("Bitstream %u bytes", bstream_len);
 
 		bstream_info= img->get_byte();
 		dec->print("Base %u/%u bits per long/lat",
@@ -494,7 +494,7 @@ void decode_ext_type_poly(bool is_polygon, char *type_label) {
     } else {
       bstream_len= (bstream_len >> 1) - 1;
     }
-    dec->print("Bitsteam %u bytes", bstream_len);
+    dec->print("Bitstream %u bytes", bstream_len);
     
     byte_t bstream_info= img->get_byte();
     dec->print("Base %u/%u bits per long/lat",
