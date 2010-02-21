@@ -30,6 +30,7 @@ void decode_net_header (class Decoder *dec_in, class ImgNET *net_in)
 	dec->set_outfile("NET", "header");
 	dec->banner("NET: Header");
 	decode_common_header(dec, net);
+	eoffset = soffset + net->hlen;
 
 	dec->print("Road defs at offset 0x%08x", 
 		offset= img->get_udword()+soffset);
@@ -71,6 +72,7 @@ void decode_net_header (class Decoder *dec_in, class ImgNET *net_in)
 	  dec->print("???", img->get_udword());
 	}
 
+	dec->print("???", img->get_string(eoffset-img->tell()).c_str());
 	dec->banner("NET: End Header");
 }
 
