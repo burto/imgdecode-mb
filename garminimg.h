@@ -333,6 +333,7 @@ public:
 		polygon_info, point_info, copyright_info, object_groups_info,
 		ext_types_info;
 	int nlevels, nsubdivisions;
+	int lowest_zoom;
 	int num_ext_line_types, num_ext_area_types, num_ext_point_types;
 	int extended_header_format;
 

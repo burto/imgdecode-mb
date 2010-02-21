@@ -265,6 +265,7 @@ static void decode_tre_levels ()
 
 		data= img->get_byte();
 		zoom= (data & 0xF);
+		tre->lowest_zoom = zoom;
 		inherited= (data & 0x80);
 		dec->print("Zoom level %u", zoom);
 		dec->comment("Inherited: %c", (inherited) ? 'Y' : 'N');
@@ -362,10 +363,10 @@ static void decode_tre_subdivs ()
 		dec->comment("%u subdivisions", tre->nsubdivisions);
 		dec->comment(NULL);
 
-		for (i= 15; i>= 0; --i) {
+		for (i= 15; i>= tre->lowest_zoom; --i) {
 			map_level_t level;
 
-			recsz= ( i ) ? 16 : 14;
+			recsz= ( i > tre->lowest_zoom) ? 16 : 14;
 			if(ifile->level_get(i, &level) < 0)
 			  continue;
 
