@@ -74,8 +74,11 @@ void decode_tre_header (class Decoder *dec_in, class ImgTRE *tre_in)
 	tre->copyright_info.rsize= rsize;
 
 	dec->print("???", img->get_udword());
+	dec->print("POI display flags", img->get_byte());
+
+	dec->print("Display priority", img->get_uint24());
 	dec->print("???", img->get_udword());
-	dec->print("???", img->get_udword());
+
 	dec->print("???", img->get_uword());
 	dec->print("???", img->get_byte());
 
